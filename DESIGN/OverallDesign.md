@@ -44,3 +44,7 @@ send the proper commands to the simple controllers. In addition, PID control wil
 implemented, using the 3-phase encoder signals from the motors. But putting the simple
 controllers and motors behind a higher-level motor controller interface, scooter BLDC
 motors will be easier to incorporate into a robotics project.</p>
+
+# References
+
+  - [https://www.digikey.com/en/articles/how-to-power-and-control-brushless-dc-motors](https://www.digikey.com/en/articles/how-to-power-and-control-brushless-dc-motors)
