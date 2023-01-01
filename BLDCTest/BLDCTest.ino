@@ -9,9 +9,9 @@ const uint8_t PWM_SPEED_PIN(1);
 const uint8_t BRAKE_PIN(2);
 const uint8_t MOTOR_DIR_PIN(3);
 const uint8_t LED_BUILTIN_PIN(13);
-const uint8_t U_ENCODER_SIGNAL_PIN(14); // yellow
-const uint8_t V_ENCODER_SIGNAL_PIN(15); // green
-const uint8_t W_ENCODER_SIGNAL_PIN(16); // blue
+const uint8_t U_ENCODER_SIGNAL_PIN(14); // yellow - Ha
+const uint8_t V_ENCODER_SIGNAL_PIN(15); // green  - Hb
+const uint8_t W_ENCODER_SIGNAL_PIN(16); // blue   - Hc
 const uint8_t BUTTON_PIN(23);
 
 // Teensy 3.5
@@ -19,9 +19,9 @@ const uint8_t BUTTON_PIN(23);
 //const uint8_t BRAKE_PIN(3);
 //const uint8_t MOTOR_DIR_PIN(4);
 //const uint8_t LED_BUILTIN_PIN(13);
-//const uint8_t U_ENCODER_SIGNAL_PIN(14); // yellow
-//const uint8_t V_ENCODER_SIGNAL_PIN(15); // blue
-//const uint8_t W_ENCODER_SIGNAL_PIN(16); // green
+//const uint8_t U_ENCODER_SIGNAL_PIN(14); // yellow - Ha
+//const uint8_t V_ENCODER_SIGNAL_PIN(15); // blue   - Hb
+//const uint8_t W_ENCODER_SIGNAL_PIN(16); // green  - Hc
 //const uint8_t BUTTON_PIN(23);
 
 TaskManager taskManager;
