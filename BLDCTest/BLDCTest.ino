@@ -54,6 +54,9 @@ void setup() {
 
   DebugMsgs.enableLevel(DEBUG);
   
+  // Uncomment for more detailed debug messages
+  //DebugMsgs.enableLevel(NOTIFICATION);
+  
   // Setup the task manager with the button pin and callbacks
   taskManager.setup(BUTTON_PIN, HIGH, setupCallback, startCallback, stopCallback, idleCallback);
 }
@@ -67,7 +70,7 @@ void countUTick() {
   int val = digitalRead(U_ENCODER_SIGNAL_PIN);
   if (val == lastUVal) { return; }
   if (lastEncoder == 'U') { return; }
-//  DebugMsgs.print("U ").print(lastUVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'W' ? " *" : "");
+  DebugMsgs.notification().print("U ").print(lastUVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'W' ? " *" : "");
   uCount += lastEncoder == 'W' ? 1 : -1;
   tickCount += lastEncoder == 'W' ? 1 : -1;
   lastEncoder = 'U';
@@ -78,7 +81,7 @@ void countVTick() {
   int val = digitalRead(V_ENCODER_SIGNAL_PIN);
   if (val == lastVVal) { return; }
   if (lastEncoder == 'V') { return; }
-//  DebugMsgs.print("V ").print(lastVVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'U' ? " *" : "");
+  DebugMsgs.notification().print("V ").print(lastVVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'U' ? " *" : "");
   vCount += lastEncoder == 'U' ? 1 : -1;
   tickCount += lastEncoder == 'U' ? 1 : -1;
   lastEncoder = 'V';
@@ -89,7 +92,7 @@ void countWTick() {
   int val = digitalRead(W_ENCODER_SIGNAL_PIN);
   if (val == lastWVal) { return; }
   if (lastEncoder == 'W') { return; }
-//  DebugMsgs.print("W ").print(lastWVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'V' ? " *" : "");
+  DebugMsgs.notification().print("W ").print(lastWVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'V' ? " *" : "");
   wCount += lastEncoder == 'V' ? 1 : -1;
   tickCount += lastEncoder == 'V' ? 1 : -1;
   lastEncoder = 'W';
@@ -199,9 +202,9 @@ void setSpeed(void* context) {
 }
 
 void printCounts(void* context) {
-//  DebugMsgs.debug().print("W state: ").println(digitalRead(W_ENCODER_SIGNAL_PIN));
-//  DebugMsgs.debug().print("U state: ").println(digitalRead(U_ENCODER_SIGNAL_PIN));
-//  DebugMsgs.debug().print("V state: ").println(digitalRead(V_ENCODER_SIGNAL_PIN));
+  DebugMsgs.notification().print("W state: ").println(digitalRead(W_ENCODER_SIGNAL_PIN));
+  DebugMsgs.notification().print("U state: ").println(digitalRead(U_ENCODER_SIGNAL_PIN));
+  DebugMsgs.notification().print("V state: ").println(digitalRead(V_ENCODER_SIGNAL_PIN));
   DebugMsgs.debug()
            .print("U: ").print(uCount)
            .print(" V: ").print(vCount)
