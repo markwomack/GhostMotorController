@@ -55,7 +55,7 @@ void setup() {
   DebugMsgs.enableLevel(DEBUG);
   
   // Setup the task manager with the button pin and callbacks
-  taskManager.setup(23, HIGH, setupCallback, startCallback, stopCallback, idleCallback);
+  taskManager.setup(BUTTON_PIN, HIGH, setupCallback, startCallback, stopCallback, idleCallback);
 }
 
 void loop() {
