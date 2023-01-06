@@ -43,9 +43,9 @@ void setup() {
   delay(1000);
 
   DebugMsgs.enableLevel(DEBUG);
-  
+    
   // Uncomment for more detailed debug messages
-  //DebugMsgs.enableLevel(NOTIFICATION);
+  DebugMsgs.enableLevel(NOTIFICATION);
   
   // Setup the task manager with the button pin and callbacks
   taskManager.setup(BUTTON_PIN, HIGH, setupCallback, startCallback, stopCallback, idleCallback);
@@ -56,39 +56,80 @@ void loop() {
   taskManager.loop();
 }
 
+/**
+  Interrupt handler for the U encoder signal.
+**/
 void countUTick() {
+  // Read the current signal value
   int val = digitalRead(U_ENCODER_SIGNAL_PIN);
-  if (val == lastUVal) { return; }
-  if (lastEncoder == 'U') { return; }
-  DebugMsgs.notification().print("U ").print(lastUVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'W' ? " *" : "");
-  uCount += lastEncoder == 'W' ? 1 : -1;
-  tickCount += lastEncoder == 'W' ? 1 : -1;
+
+  // Check for an encoder fault  
+  bool encoderFault = (lastEncoder == 'U') || // Last encoder was this one
+                      (lastEncoder == 'W' && motorContext.motorDirection) || // Last encoder was W, but going forward
+                      (lastEncoder == 'V' && !motorContext.motorDirection);  // Last encoder was V, but going reverse
+
+  //if (encoderFault) {
+    DebugMsgs.notification().print("U ").print(lastUVal).print(' ').print(val).print(' ')
+      .print(lastEncoder).println(encoderFault ? " *" : "");
+  //}
+
+  // If there is a fault, don't record a tick.
+  if (encoderFault) { return; }
+  
+  int increment = (lastEncoder == 'W') ? 1 : -1;
+  uCount += increment;
+  tickCount += increment;
   lastEncoder = 'U';
   lastUVal = val;
 }
 
 void countVTick() {
+  // Read the current signal value
   int val = digitalRead(V_ENCODER_SIGNAL_PIN);
-  if (val == lastVVal) { return; }
-  if (lastEncoder == 'V') { return; }
-  DebugMsgs.notification().print("V ").print(lastVVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'U' ? " *" : "");
-  vCount += lastEncoder == 'U' ? 1 : -1;
-  tickCount += lastEncoder == 'U' ? 1 : -1;
+
+  // Check for an encoder fault  
+  bool encoderFault = (lastEncoder == 'V') || // Last encoder was this one
+                      (lastEncoder == 'U' && motorContext.motorDirection) || // Last encoder was U, but going forward
+                      (lastEncoder == 'W' && !motorContext.motorDirection);  // Last encoder was W, but going reverse
+  
+  //if (encoderFault) {
+    DebugMsgs.notification().print("V ").print(lastVVal).print(' ').print(val).print(' ')
+      .print(lastEncoder).println(encoderFault ? " *" : "");
+  //}
+
+  // If there is a fault, don't record a tick.
+  if (encoderFault) { return; }
+  
+  int increment = (lastEncoder == 'U') ? 1 : -1;
+  vCount += increment;
+  tickCount += increment;
   lastEncoder = 'V';
   lastVVal = val;
 }
 
 void countWTick() {
+  // Read the current signal value
   int val = digitalRead(W_ENCODER_SIGNAL_PIN);
-  if (val == lastWVal) { return; }
-  if (lastEncoder == 'W') { return; }
-  DebugMsgs.notification().print("W ").print(lastWVal).print(' ').print(val).print(' ').print(lastEncoder).println(lastEncoder != 'V' ? " *" : "");
-  wCount += lastEncoder == 'V' ? 1 : -1;
-  tickCount += lastEncoder == 'V' ? 1 : -1;
+
+  // Check for an encoder fault  
+  bool encoderFault = (lastEncoder == 'W') || // Last encoder was this one
+                      (lastEncoder == 'V' && motorContext.motorDirection) || // Last encoder was V, but going forward
+                      (lastEncoder == 'U' && !motorContext.motorDirection);  // Last encoder was U, but going reverse
+
+  //if (encoderFault) {
+    DebugMsgs.notification().print("W ").print(lastWVal).print(' ').print(val).print(' ')
+      .print(lastEncoder).println(encoderFault ? " *" : "");
+  //}
+
+  // If there is a fault, don't record a tick.
+  if (encoderFault) { return; }
+  
+  int increment = (lastEncoder == 'V') ? 1 : -1;         
+  wCount += increment;
+  tickCount += increment;
   lastEncoder = 'W';
   lastWVal = val;
 }
-
 
 void setupCallback(void) {
   tickCount = 0;
@@ -141,7 +182,7 @@ void startCallback(void) {
   vCount = 0;
   wCount = 0;
   motorContext.incrementDirection = true;
-  motorContext.motorDirection = false;
+  motorContext.motorDirection = false;  // false == forward, true == reverse
   motorContext.speed = 0;
 
   analogWrite(PWM_SPEED_PIN, motorContext.speed);
@@ -189,14 +230,11 @@ void setSpeed(void* context) {
       digitalWrite(MOTOR_DIR_PIN, motorContext->motorDirection ? HIGH : LOW);
     }
   }
-  DebugMsgs.debug().print("Speed: ").println(motorContext->speed);
+  //DebugMsgs.debug().print("Speed: ").println(motorContext->speed);
   analogWrite(PWM_SPEED_PIN, motorContext->speed);
 }
 
 void printCounts(void* context) {
-  DebugMsgs.notification().print("W state: ").println(digitalRead(W_ENCODER_SIGNAL_PIN));
-  DebugMsgs.notification().print("U state: ").println(digitalRead(U_ENCODER_SIGNAL_PIN));
-  DebugMsgs.notification().print("V state: ").println(digitalRead(V_ENCODER_SIGNAL_PIN));
   DebugMsgs.debug()
            .print("U: ").print(uCount)
            .print(" V: ").print(vCount)
