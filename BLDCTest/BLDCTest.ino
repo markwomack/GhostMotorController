@@ -19,10 +19,13 @@ TaskManager taskManager;
 volatile int32_t tickCount;
 volatile int32_t uCount;
 volatile int lastUVal;
+volatile int uFaultCount;
 volatile int32_t vCount;
 volatile int lastVVal;
+volatile int vFaultCount;
 volatile int32_t wCount;
 volatile int lastWVal;
+volatile int wFaultCount;
 volatile char lastEncoder;
 
 struct LEDContext {
@@ -45,7 +48,7 @@ void setup() {
   DebugMsgs.enableLevel(DEBUG);
     
   // Uncomment for more detailed debug messages
-  DebugMsgs.enableLevel(NOTIFICATION);
+  //DebugMsgs.enableLevel(NOTIFICATION);
   
   // Setup the task manager with the button pin and callbacks
   taskManager.setup(BUTTON_PIN, HIGH, setupCallback, startCallback, stopCallback, idleCallback);
@@ -67,11 +70,12 @@ void countUTick() {
   bool encoderFault = (lastEncoder == 'U') || // Last encoder was this one
                       (lastEncoder == 'W' && motorContext.motorDirection) || // Last encoder was W, but going forward
                       (lastEncoder == 'V' && !motorContext.motorDirection);  // Last encoder was V, but going reverse
-
-  //if (encoderFault) {
-    DebugMsgs.notification().print("U ").print(lastUVal).print(' ').print(val).print(' ')
-      .print(lastEncoder).println(encoderFault ? " *" : "");
-  //}
+  
+  if (encoderFault) {
+    uFaultCount++;
+    // DebugMsgs.notification().print("U ").print(lastUVal).print(' ').print(val).print(' ')
+    //   .print(lastEncoder).println(encoderFault ? " *" : "");
+  }
 
   // If there is a fault, don't record a tick.
   if (encoderFault) { return; }
@@ -92,10 +96,11 @@ void countVTick() {
                       (lastEncoder == 'U' && motorContext.motorDirection) || // Last encoder was U, but going forward
                       (lastEncoder == 'W' && !motorContext.motorDirection);  // Last encoder was W, but going reverse
   
-  //if (encoderFault) {
-    DebugMsgs.notification().print("V ").print(lastVVal).print(' ').print(val).print(' ')
-      .print(lastEncoder).println(encoderFault ? " *" : "");
-  //}
+  if (encoderFault) {
+    vFaultCount++;
+    // DebugMsgs.notification().print("V ").print(lastVVal).print(' ').print(val).print(' ')
+    //   .print(lastEncoder).println(encoderFault ? " *" : "");
+  }
 
   // If there is a fault, don't record a tick.
   if (encoderFault) { return; }
@@ -116,10 +121,11 @@ void countWTick() {
                       (lastEncoder == 'V' && motorContext.motorDirection) || // Last encoder was V, but going forward
                       (lastEncoder == 'U' && !motorContext.motorDirection);  // Last encoder was U, but going reverse
 
-  //if (encoderFault) {
-    DebugMsgs.notification().print("W ").print(lastWVal).print(' ').print(val).print(' ')
-      .print(lastEncoder).println(encoderFault ? " *" : "");
-  //}
+  if (encoderFault) {
+    wFaultCount++;
+    // DebugMsgs.notification().print("W ").print(lastWVal).print(' ').print(val).print(' ')
+    //   .print(lastEncoder).println(encoderFault ? " *" : "");
+  }
 
   // If there is a fault, don't record a tick.
   if (encoderFault) { return; }
@@ -134,8 +140,11 @@ void countWTick() {
 void setupCallback(void) {
   tickCount = 0;
   uCount = 0;
+  uFaultCount = 0;
   vCount = 0;
+  vFaultCount = 0;
   wCount = 0;
+  vFaultCount = 0;
 
   // Initialize our contexts
 
@@ -179,18 +188,23 @@ void setupCallback(void) {
 void startCallback(void) {
   tickCount = 0;
   uCount = 0;
+  uFaultCount = 0;
   vCount = 0;
+  vFaultCount = 0;
   wCount = 0;
-  motorContext.incrementDirection = true;
+  vFaultCount = 0;
+  motorContext.incrementDirection = true; // false == slow it down, true == speed it up
   motorContext.motorDirection = false;  // false == forward, true == reverse
   motorContext.speed = 0;
 
+  // Set up the speed (0) and set the direction
   analogWrite(PWM_SPEED_PIN, motorContext.speed);
   digitalWrite(MOTOR_DIR_PIN, motorContext.motorDirection ? HIGH : LOW);
   
   // Allow the motor to spin
   digitalWrite(BRAKE_PIN, LOW);
   
+  // Set up the best effort callbacks
   taskManager.callbackEvery(500, ledCallback, (void*)&ledContext);
   taskManager.callbackEvery(1000, printCounts, (void*)0);
   taskManager.callbackEvery(500, setSpeed, (void*)&motorContext);
@@ -215,22 +229,27 @@ const int maxSpeed(5000); //5000
 
 void setSpeed(void* context) {
   MotorContext* motorContext = (MotorContext*)context;
+  // Motor is accelerating  
   if (motorContext->incrementDirection) {
     motorContext->speed = min(motorContext->speed + speedIncrement, maxSpeed);
+
+    // When we match the max speed, then start decelerating
     if (motorContext->speed == maxSpeed) {
       motorContext->incrementDirection = !motorContext->incrementDirection;
     }
+  // Motor is decelerating   
   } else {
     motorContext->speed = max(motorContext->speed - speedIncrement, 0);
+    
+    // When we reach 0, then switch the direction of the motor
     if (motorContext->speed == 0) {
       motorContext->incrementDirection = !motorContext->incrementDirection;
-
-      // change direction of the motor
       motorContext->motorDirection = !motorContext->motorDirection;
       digitalWrite(MOTOR_DIR_PIN, motorContext->motorDirection ? HIGH : LOW);
     }
   }
   //DebugMsgs.debug().print("Speed: ").println(motorContext->speed);
+  // Update the speed
   analogWrite(PWM_SPEED_PIN, motorContext->speed);
 }
 
@@ -240,6 +259,11 @@ void printCounts(void* context) {
            .print(" V: ").print(vCount)
            .print(" W: ").print(wCount)
            .print(" tick: ").println(tickCount);
+  if (uFaultCount != 0 || vFaultCount != 0 || wFaultCount != 0) {
+    DebugMsgs.debug().print("Faults- U: ").print(uFaultCount).print(" V: ").print(vFaultCount)
+      .print(" W: ").println(wFaultCount);
+    uFaultCount = vFaultCount = wFaultCount = 0;
+  }
 }
 
 // This method is registered above with the task manager.
