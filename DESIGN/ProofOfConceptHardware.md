@@ -4,7 +4,7 @@
   as long as it conforms to the following requirements:</p>
   
   - The motors must be 3 phase and provide encoder signals that can be connected to the 3.3v
-    Teensy 4.0.
+    Teensy 4.0 (using a 5v->3.3v logic converter, if needed, is acceptable).
   - The motorcontrollers must be compatible with the chosen motors and must allow for the
     speed to be set via a PWM signal.
   - Proper voltage must be provided to the motors, the motorcontrollers, and the Teensy 4.0.
@@ -18,12 +18,13 @@
   - 1 - [36v ebike lithium ion battery](https://www.amazon.com/dp/B08FWRZYJ3)
   - 1 - [XT60 inline on/off switch](https://www.amazon.com/dp/B0993C65H5)
   - 2 - [24v DC regulator](https://www.amazon.com/dp/B06Y5JVHX8)
-  - 2 - [5v DC step-down regulator](https://www.amazon.com/dp/B00J3MHRNO)
+  - 1 - [5v DC step-down regulator](https://www.amazon.com/dp/B07YCQTSXQ)
   - 2 - [Shunt Regulator](https://www.pololu.com/product/3779)
+  - 1 - [Mini Pushbutton Power Switch with Reverse Voltage Protection](https://www.pololu.com/product/2808)
   - 2 - [Big Pushbutton Power Switch with Reverse Voltage Protection](https://www.pololu.com/product/2813)
   - 1 - [3.3v step-down regulator](https://www.pololu.com/product/2122)
 
 ## Microcontroller
   - 1 - [Teensy 4.0](https://www.pjrc.com/store/teensy40.html)
-  - voltage level shifter
+  - 4 - [Logic Converter](https://www.sparkfun.com/products/12009)
   - 1 Momentary pushbutton
