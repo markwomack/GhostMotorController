@@ -5,7 +5,7 @@
   
   - The motors must be 3 phase and provide encoder signals that can be connected to the 3.3v
     Teensy 4.0 (using a 5v->3.3v logic converter, if needed, is acceptable).
-  - The motorcontrollers must be compatible with the chosen motors and must allow for the
+  - The motor controllers must be compatible with the chosen motors and must allow for the
     speed to be set via a PWM signal.
   - Proper voltage must be provided to the motors, the motorcontrollers, and the Teensy 4.0.
 
@@ -14,9 +14,10 @@
 
 ## Motor and Power
   - 2 - [12" scooter/ebike BLDC motors](https://www.amazon.com/dp/B08ZXYND7G)
-  - 2 - [BLDC motorcontrollers](https://www.amazon.com/RioRand-6-60V-Brushless-Electric-Controller/dp/B087M2378D)
+  - 2 - [BLDC motor controllers](https://www.amazon.com/RioRand-6-60V-Brushless-Electric-Controller/dp/B087M2378D)
   - 1 - [36v ebike lithium ion battery](https://www.amazon.com/dp/B08FWRZYJ3)
-  - 1 - [XT60 inline on/off switch](https://www.amazon.com/dp/B0993C65H5)
+  - 1 - [Battery Disconnect Switch](https://www.amazon.com/dp/B08YXGXW2W)
+  - 1 - [Inline Fuse Holder](https://www.amazon.com/dp/B081DHT8Y7)
   - 2 - [24v DC regulator](https://www.amazon.com/dp/B06Y5JVHX8)
   - 1 - [5v DC step-down regulator](https://www.amazon.com/dp/B07YCQTSXQ)
   - 2 - [Shunt Regulator](https://www.pololu.com/product/3779)
