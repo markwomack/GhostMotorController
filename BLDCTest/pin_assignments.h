@@ -1,4 +1,7 @@
-
+//
+// Licensed under Apache 2.0 license.
+// See accompanying LICENSE file for details.
+//
 
 #ifndef PIN_ASSIGNMENTS_H
 #define PIN_ASSIGNMENTS_H

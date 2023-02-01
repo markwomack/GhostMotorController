@@ -1,3 +1,7 @@
+//
+// Licensed under Apache 2.0 license.
+// See accompanying LICENSE file for details.
+//
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
@@ -7,19 +11,19 @@
 
 struct MotorEncoderInfo {
   // All volatile members are accessed by interrupts and regular code
-  volatile int32_t totalInterrupts; // Number of times interrupts have been called
-  volatile int32_t tickCount;       // Number of valid ticks counted
-  volatile int32_t uTickCount;      // Number of U ticks
-  volatile int32_t vTickCount;      // Number of V ticks
-  volatile int32_t wTickCount;      // Number of W ticks
-  volatile int uFaultCount;         // Number of faults recorded in U interrupt
-  volatile int vFaultCount;         // Number of faults recorded in V interrupt
-  volatile int wFaultCount;         // Number of faults recorded in W interrupt
-  volatile char prevUVal;           // Previous value read on U interrupt pin (0/1)
-  volatile char prevVVal;           // Previous value read on V interrupt pin (0/1)
-  volatile char prevWVal;           // Previous value read on W interrupt pin (0/1)
-  volatile char prevEncoder;        // Previous interrupt that was executed
-  volatile bool motorDirection;     // Current motor direction
+  int32_t volatile totalInterrupts; // Number of times interrupts have been called
+  int32_t volatile tickCount;       // Number of valid ticks counted
+  int32_t volatile uTickCount;      // Number of U ticks
+  int32_t volatile vTickCount;      // Number of V ticks
+  int32_t volatile wTickCount;      // Number of W ticks
+  int volatile uFaultCount;         // Number of faults recorded in U interrupt
+  int volatile vFaultCount;         // Number of faults recorded in V interrupt
+  int volatile wFaultCount;         // Number of faults recorded in W interrupt
+  char volatile prevUVal;           // Previous value read on U interrupt pin (0/1)
+  char volatile prevVVal;           // Previous value read on V interrupt pin (0/1)
+  char volatile prevWVal;           // Previous value read on W interrupt pin (0/1)
+  char volatile prevEncoder;        // Previous interrupt that was executed
+  bool volatile motorDirection;     // Current motor direction
   bool incrementDirection;          // Speed increment direction (speeding up/slowing down)
   int speed;                        // Current speed (power)
 };
