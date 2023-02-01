@@ -29,11 +29,12 @@
   - 1 - [3.3v step-down regulator](https://www.pololu.com/product/4940)
   - 1 - [5v step-down/up regulator](https://www.pololu.com/product/4941)
   - 1 - Diode (to prevent backflow to the power switches)
+  - 1 - Momentary pushbutton
 
 ## Microcontroller
   - 1 - [Teensy 4.0](https://www.pjrc.com/store/teensy40.html)
   - 4 - [Logic Converter](https://www.sparkfun.com/products/12009)
-  - 1 Momentary pushbutton
+  - 1 - Momentary pushbutton
 
 ## Miscellaneous
   - [Wire connectors](https://www.amazon.com/dp/B0882TNS73)
