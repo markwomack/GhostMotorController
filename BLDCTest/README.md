@@ -1,3 +1,4 @@
 # BLDCTest
-This is a test sketch that is used to test the basic functionality of getting
-ticks from the motor and controlling its speed.
+<p>This is a sketch that is used to test the proof-of-concept electronics for one or two motors.
+If only using one motor, as the system is built out, then comment out the motor 2 tasks that
+are defined and setup in the sketch.</p>
