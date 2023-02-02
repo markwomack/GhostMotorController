@@ -8,6 +8,7 @@
 
 // My includes
 #include <DebugMsgs.h>
+#include <TaskManager.h>
 
 // Local includes
 #include "tasks.h"
@@ -70,6 +71,8 @@ void ControlMotorTask::update(void) {
     // When we match the max speed, then start decelerating
     if (_motor->speed == maxSpeed) {
       _motor->incrementDirection = !_motor->incrementDirection;
+      // taskManager.stop();
+      // return;
     }
   // Motor is decelerating   
   } else {
