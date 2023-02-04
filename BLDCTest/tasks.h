@@ -30,6 +30,15 @@ class ControlMotorTask : public Task {
     uint8_t _motorDirPin;
 };
 
+class CountRotationsTask :public Task {
+  public:
+    void setRotations(int numRotations);
+    void update(void);
+
+  private:
+    int _numRotations;
+};
+
 class PrintMotorTickCountsTask : public Task {
   public:
     void setup(MotorEncoderInfo* motor, String label);

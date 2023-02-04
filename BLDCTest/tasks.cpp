@@ -16,10 +16,12 @@
 #include "globals.h"
 
 // TODO: are these processor model specific?
-const int speedIncrement(200); //200
-const int maxSpeed(5000); //5000
+const int speedIncrement(100); //200
+const int maxSpeed(8191); //8191 this value is based on the frequency set on the PWM
 
-void stopMotors() {
+const int32_t NUM_TICKS_PER_ROTATION(120);
+
+void stopMotorsGradually() {
   if (motor1.speed > 0 || motor2.speed > 0) {
     DebugMsgs.debug().println("Stopping motors...");
     // Spin down the motor in controlled manner
@@ -35,6 +37,15 @@ void stopMotors() {
     digitalWrite(M2_BRAKE_PIN, HIGH);
     DebugMsgs.debug().println("...motors stopped.");
   }
+}
+
+void stopMotorsImmediately() {
+  analogWrite(M1_PWM_SPEED_PIN, 0);
+  digitalWrite(M1_BRAKE_PIN, HIGH);
+  analogWrite(M2_PWM_SPEED_PIN, 0);
+  digitalWrite(M2_BRAKE_PIN, HIGH);
+  motor1.speed = 0; 
+  motor2.speed = 0; 
 }
 
 void ControlMotorTask::setup(MotorEncoderInfo* motor, String label, uint8_t pwmSpeedPin, uint8_t motorDirPin, uint8_t brakePin) {
@@ -91,7 +102,25 @@ void ControlMotorTask::update(void) {
 }
 
 void ControlMotorTask::stop(void) {
-  stopMotors();
+  stopMotorsGradually();
+}
+
+void CountRotationsTask::setRotations(int numRotations) {
+  _numRotations = numRotations;
+}
+
+void CountRotationsTask::update(void) {
+  noInterrupts();
+  int32_t currentTicks = motor1.tickCount;
+  interrupts();
+  //DebugMsgs.debug().print("CountRotationsTask motor1.tickCount = ").println(motor1.tickCount);
+  if (currentTicks > (_numRotations * NUM_TICKS_PER_ROTATION)) {
+    stopMotorsImmediately();
+    taskManager.stop();
+    DebugMsgs.debug().print("Stopped motors after ")
+      .print(_numRotations).print(" rotations and ")
+      .print(currentTicks).println(" ticks");
+  }
 }
 
 void PrintMotorTickCountsTask::setup(MotorEncoderInfo* motor, String label) {
@@ -130,8 +159,8 @@ void PrintTickSpeedTask::update(void) {
     int32_t diffM1Ticks = abs(curM1TickCount - lastM1TickCount);
     int32_t diffM2Ticks = abs(curM2TickCount - lastM2TickCount);
 
-    DebugMsgs.debug().print("M1 ticks/second: ").println(diffM1Ticks * (1000/diffTime));
-    DebugMsgs.debug().print("M2 ticks/second: ").println(diffM2Ticks * (1000/diffTime));
+    DebugMsgs.debug().print("M1 ticks/second: ").print(diffM1Ticks * (1000/diffTime)).print(", speed: ").println(motor1.speed);
+    DebugMsgs.debug().print("M2 ticks/second: ").print(diffM2Ticks * (1000/diffTime)).print(", speed: ").println(motor2.speed);
   }
 
   lastM1TickCount = curM1TickCount;

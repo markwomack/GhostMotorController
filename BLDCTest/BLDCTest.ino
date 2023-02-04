@@ -22,6 +22,7 @@ ControlMotorTask controlM1Task;
 ControlMotorTask controlM2Task;
 PrintMotorTickCountsTask printM1TickCountsTask;
 PrintMotorTickCountsTask printM2TickCountsTask;
+CountRotationsTask countM1RotationsTask;
 PrintTickSpeedTask printTickSpeedTask;
 BlinkTask idleTask;
 
@@ -108,13 +109,16 @@ void setup() {
   printM1TickCountsTask.setup(&motor1, "M1");
   taskManager.addTask(&printM1TickCountsTask, 1000);
   
+  // countM1RotationsTask.setRotations(5);
+  // taskManager.addTask(&countM1RotationsTask, 1);
+  
   // Motor 2
   controlM2Task.setup(&motor2, "M2", M2_PWM_SPEED_PIN, M2_MOTOR_DIR_PIN, M2_BRAKE_PIN);
   taskManager.addTask(&controlM2Task, 500);
   printM2TickCountsTask.setup(&motor2, "M2");
   taskManager.addTask(&printM2TickCountsTask, 1000);
   
-  //taskManager.addTask(&printTickSpeedTask, 1000);
+  taskManager.addTask(&printTickSpeedTask, 1000);
 
   // Start the task manager to monitor the button
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);
