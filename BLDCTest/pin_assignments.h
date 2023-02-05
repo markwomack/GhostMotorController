@@ -22,10 +22,11 @@ const uint8_t M2_BRAKE_PIN(12);
 const uint8_t M2_MOTOR_DIR_PIN(11);
 const uint8_t LED_BUILTIN_PIN(13); // Used by TaskManager blink task
 const uint8_t M2_PWM_SPEED_PIN(14);
-const uint8_t I2C_SDA(18);
-const uint8_t I2C_SCL(19);
-const uint8_t SERIAL_TX(20);
-const uint8_t SERIAL_RX(21);
-const uint8_t BUTTON_PIN(23);
+const uint8_t BUTTON_PIN(15);
+const uint8_t I2C_SCL_PIN(16);
+const uint8_t I2C_SDA_PIN(17);
+const uint8_t RC_ENABLE_PIN(18);
+const uint8_t SERIAL_TX_PIN(20);
+const uint8_t SERIAL_RX_PIN(21);
 
 #endif // PIN_ASSIGNMENTS_H
