@@ -1,0 +1,5 @@
+// Ignore the backups directory created by KiCAD
+PowerSwitches-backups/
+
+// Ignore the cache files created by KiCAD
+fp-info-cache
