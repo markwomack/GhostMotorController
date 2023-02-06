@@ -1,4 +1,5 @@
 // Ignore the backups directory created by KiCAD
 ScooterBLDCMotorController-backups/
-// Ignore the cache file created by KiCAD
 
+// Ignore the cache files created by KiCAD
+fp-info-cache
