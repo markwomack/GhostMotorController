@@ -48,3 +48,4 @@ motors will be easier to incorporate into a robotics project.</p>
 # References
 
   - [https://www.digikey.com/en/articles/how-to-power-and-control-brushless-dc-motors](https://www.digikey.com/en/articles/how-to-power-and-control-brushless-dc-motors)
+  - [https://www.digikey.com/en/blog/using-bldc-hall-sensors-as-position-encoders-part-1](https://www.digikey.com/en/blog/using-bldc-hall-sensors-as-position-encoders-part-1)
