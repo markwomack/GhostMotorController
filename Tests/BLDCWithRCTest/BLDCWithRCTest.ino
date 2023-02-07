@@ -7,7 +7,9 @@
 #include <Arduino.h>
 
 // My includes
+#include <DebugMsgs.h>
 #include <TaskManager.h>
+#include <BlinkTask.h>
 
 // Local includes
 #include "pin_assignments.h"
@@ -15,6 +17,7 @@
 #include "interrupts.h"
 #include "tasks.h"
 
+BlinkTask idleTask;
 ReadRCChannelTask readRCChannel1Task;
 ReadRCChannelTask readRCChannel2Task;
 AdjustMotorSpeedsTask adjustMotorSpeedsTask;
@@ -36,12 +39,6 @@ void setupPins() {
   analogWriteResolution(13);
   analogWriteFrequency(M1_PWM_SPEED_PIN, 18310.55);
   analogWriteFrequency(M2_PWM_SPEED_PIN, 18310.55);
-
-  //Teensy 3.5
-  // values will be 0-4095
-//  analogWriteResolution(12);
-//  analogWriteFrequency(M1_PWM_SPEED_PIN, 14648.437);
-//  analogWriteFrequency(M2_PWM_SPEED_PIN, 14648.437);
 
   // Setup brake pins, engage brake
   pinMode(M1_BRAKE_PIN, OUTPUT);
@@ -83,15 +80,24 @@ void setupPins() {
 }
 
 void setup() {
+  Serial.begin(9600);
+
+  DebugMsgs.enableLevel(DEBUG);
+  
+  setupPins();
+  
   readRCChannel1Task.setChannelPin(RC_CH1_PIN);
   readRCChannel2Task.setChannelPin(RC_CH2_PIN);
 
   adjustMotorSpeedsTask.setRCChannels(&readRCChannel1Task, &readRCChannel2Task);
-
+  adjustMotorSpeedsTask.setMotor1Info("M1", &motor1, M1_PWM_SPEED_PIN, M1_MOTOR_DIR_PIN, M1_BRAKE_PIN);
+  adjustMotorSpeedsTask.setMotor2Info("M2", &motor2, M2_PWM_SPEED_PIN, M2_MOTOR_DIR_PIN, M2_BRAKE_PIN);
+  
   taskManager.addTask(&readRCChannel1Task, 50);
   taskManager.addTask(&readRCChannel2Task, 50);
   taskManager.addTask(&adjustMotorSpeedsTask, 100);
   
+  taskManager.addIdleTask(&idleTask, 100);
   taskManager.addBlinkTask(500);
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);
 }
