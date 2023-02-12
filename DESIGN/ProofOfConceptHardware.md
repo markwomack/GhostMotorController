@@ -5,7 +5,7 @@
   
   - The motors must be 3 phase and provide encoder signals that can be connected to the 3.3v
     Teensy 4.0 (using a 5v->3.3v logic converter, if needed, is acceptable).
-  - The motor controllers must be compatible with the chosen motors and must allow for the
+  - The BLDC motor controllers must be compatible with the chosen motors and must allow for the
     speed to be set via a PWM signal.
   - Proper voltage must be provided to the motors, the motorcontrollers, and the Teensy 4.0.
   - The [36v->5v step-down regulator](https://www.amazon.com/dp/B07YCQTSXQ) is used for intial
@@ -34,6 +34,9 @@
 ## Microcontroller
   - 1 - [Teensy 4.0](https://www.pjrc.com/store/teensy40.html)
   - 4 - [Logic Converter](https://www.sparkfun.com/products/12009)
+  - 1 - [Level Translator](https://www.sparkfun.com/products/15439)
+  - 2 - [Hex Inverters with Schmitt Triggers IC chips)](https://www.digikey.com/en/products/detail/texas-instruments/SN74HC14N/277223)
+  - 6 - [1000pF capacitors](https://www.digikey.com/en/products/detail/vishay-beyschlag-draloric-bc-components/A102K15X7RF5TAA/2356716)
   - 1 - Momentary pushbutton
 
 ## Miscellaneous
