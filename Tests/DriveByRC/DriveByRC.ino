@@ -28,7 +28,7 @@ MotorController* motorController;
 
 BlinkTask idleTask;
 
-class SetSpeedFromRC : public Task {
+class SetSpeedFromRCTask : public Task {
   public:
     void setRCPins(uint8_t chan1Pin, uint8_t chan2Pin) {
       _chan1Pin = chan1Pin;
@@ -36,15 +36,15 @@ class SetSpeedFromRC : public Task {
     };
     
     void start(void) {
+      digitalWrite(M0_BRAKE_PIN, LOW);
       digitalWrite(M1_BRAKE_PIN, LOW);
-      digitalWrite(M2_BRAKE_PIN, LOW);
       motorController->start();
       motorController->setDesiredSpeeds(0, 0);
     };
     
     void stop(void) {
+      digitalWrite(M0_BRAKE_PIN, HIGH);
       digitalWrite(M1_BRAKE_PIN, HIGH);
-      digitalWrite(M2_BRAKE_PIN, HIGH);
       motorController->stop();
     };
     
@@ -75,17 +75,22 @@ class SetSpeedFromRC : public Task {
     };
     
     void update(void) {
+      DebugMsgs.debug().println(pulseIn(_chan2Pin, HIGH, 20000));
+
+      return;
+      
       int ch1Val = readChannel(_chan1Pin, -100, 100, NO_RC_SIGNAL);
       int ch2Val = readChannel(_chan2Pin, -100, 100, NO_RC_SIGNAL);
-      
+
+      DebugMsgs.debug().print("RC Channels: ").print(ch1Val).print(" : ").println(ch2Val);
+
       if (ch1Val == NO_RC_SIGNAL || ch2Val == NO_RC_SIGNAL) {
         DebugMsgs.debug().println("RC channel lost, stopping...");
         performControlledStop();
         taskManager.stop();
+        return;
       }
-      
-      DebugMsgs.debug().print("RC Channels: ").print(ch1Val).print(" : ").println(ch2Val);
-            
+                  
       double linearVelocity = ((double)ch2Val/100.0) * MAX_LINEAR_VELOCITY;
       double angularVelocity = ((double)ch1Val/100.0) * MAX_ANGULAR_VELOCITY;
       
@@ -96,8 +101,12 @@ class SetSpeedFromRC : public Task {
       
       motorController->setDesiredSpeeds(m0Speed, m1Speed);
     };
+
+  private:
+    uint8_t _chan1Pin;
+    uint8_t _chan2Pin;
 };
-SetSpeedsTask setSpeedsTask;
+SetSpeedFromRCTask setSpeedFromRCTask;
 
 class AdjustSpeedsTask : public Task {
   public:
@@ -119,17 +128,15 @@ void setup() {
   // Setup the encoders
   ThreePhaseMotorEncoder* m0ThreePhaseEncoder = new ThreePhaseMotorEncoder();
   m0ThreePhaseEncoder->begin(M0_V_SIGNAL_PIN, M0_W_SIGNAL_PIN, M0_U_SIGNAL_PIN);
-  m0Encoder = m0ThreePhaseEncoder;
   ThreePhaseMotorEncoder* m1ThreePhaseEncoder = new ThreePhaseMotorEncoder();
   m1ThreePhaseEncoder->begin(M1_V_SIGNAL_PIN, M1_W_SIGNAL_PIN, M1_U_SIGNAL_PIN);
-  m1Encoder = m1ThreePhaseEncoder;
 
   // Setup the motor manager
   GhostMotorManager* ghostMotorManager = new GhostMotorManager();
   ghostMotorManager->begin(M0_SPEED_PIN, M0_DIR_PIN, M0_BRAKE_PIN,
   M1_SPEED_PIN, M1_DIR_PIN, M1_BRAKE_PIN);
   motorManager = (MotorAndEncoderManager*)ghostMotorManager;
-  motorManager->setEncoders(m0Encoder, m1Encoder);
+  motorManager->setEncoders(m0ThreePhaseEncoder, m1ThreePhaseEncoder);
 
   DebugMsgs.debug().print("RADIANS_PER_TICK: ").println(RADIANS_PER_TICK);
   DebugMsgs.debug().print("MAX_RADIANS_PER_SECOND: ").println(MAX_RADIANS_PER_SECOND);
@@ -140,8 +147,8 @@ void setup() {
   
   taskManager.addIdleTask(&idleTask, 100);
   taskManager.addBlinkTask(500);
+  taskManager.addTask(&setSpeedFromRCTask, 1000);
   taskManager.addTask(&adjustSpeedsTask, 10);
-  taskManager.addTask(&setSpeedsTask, 50);
   
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);
 }
