@@ -23,7 +23,7 @@ const uint8_t LED_BUILTIN_PIN(13); // Used by TaskManager blink task
 const uint8_t M1_SPEED_PIN(14);
 const uint8_t BUTTON_PIN(15);
 const uint8_t RC_ENABLE_PIN(18);
-const uint8_t RC_CH1_PIN(22);
-const uint8_t RC_CH2_PIN(23);
+const uint8_t RC_CH1_PIN(23);
+const uint8_t RC_CH2_PIN(22);
 
 #endif // PIN_ASSIGNMENTS_H

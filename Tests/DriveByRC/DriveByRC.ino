@@ -75,22 +75,25 @@ class SetSpeedFromRCTask : public Task {
     };
     
     void update(void) {
-      DebugMsgs.debug().println(pulseIn(_chan2Pin, HIGH, 20000));
-
-      return;
-      
       int ch1Val = readChannel(_chan1Pin, -100, 100, NO_RC_SIGNAL);
       int ch2Val = readChannel(_chan2Pin, -100, 100, NO_RC_SIGNAL);
 
       DebugMsgs.debug().print("RC Channels: ").print(ch1Val).print(" : ").println(ch2Val);
-
+      
       if (ch1Val == NO_RC_SIGNAL || ch2Val == NO_RC_SIGNAL) {
         DebugMsgs.debug().println("RC channel lost, stopping...");
         performControlledStop();
         taskManager.stop();
         return;
       }
-                  
+
+      if (abs(ch1Val) <= 5) {
+        ch1Val = 0;
+      }
+      if (abs(ch2Val) <= 5) {
+        ch2Val = 0;
+      }
+      
       double linearVelocity = ((double)ch2Val/100.0) * MAX_LINEAR_VELOCITY;
       double angularVelocity = ((double)ch1Val/100.0) * MAX_ANGULAR_VELOCITY;
       
@@ -144,10 +147,12 @@ void setup() {
   DebugMsgs.debug().print("MAX_ANGULAR_VELOCITY: ").println(MAX_ANGULAR_VELOCITY);
 
   motorController = new MotorController(motorManager, KP, KI, KD, 50, RADIANS_PER_TICK, MAX_RADIANS_PER_SECOND);
+
+  setSpeedFromRCTask.setRCPins(RC_CH1_PIN, RC_CH2_PIN);
   
   taskManager.addIdleTask(&idleTask, 100);
   taskManager.addBlinkTask(500);
-  taskManager.addTask(&setSpeedFromRCTask, 1000);
+  taskManager.addTask(&setSpeedFromRCTask, 50);
   taskManager.addTask(&adjustSpeedsTask, 10);
   
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);

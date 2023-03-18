@@ -38,7 +38,7 @@ const double WHEEL_DIAM_M(0.3048);
 const double WHEEL_CIRCUMFERENCE_M(PI * WHEEL_DIAM_M); // C=2*pi*r -> C=pi*2r -> C=pi*D
 const double MAX_METERS_PER_SECOND(MAX_ROTATIONS_PER_SECOND * WHEEL_CIRCUMFERENCE_M);
 
-const double MAX_LINEAR_VELOCITY(0.3 * MAX_RADIANS_PER_SECOND);  // 30% of maximum speed
+const double MAX_LINEAR_VELOCITY(0.2 * MAX_RADIANS_PER_SECOND);  // 20% of maximum speed
 const double MAX_ANGULAR_VELOCITY(0.2 * MAX_RADIANS_PER_SECOND); // 20% of maximum speed
 
 // Constants used with PID controller in the motor controller
