@@ -3,6 +3,9 @@
 // See accompanying LICENSE file for details.
 //
 
+// This is a program to drive a MotorController
+// instance using input from the RC channels.
+
 // Arduino includes
 #include <Arduino.h>
 
@@ -18,7 +21,6 @@
 // Local includes
 #include "globals.h"
 #include "pin_assignments.h"
-
 
 // Motor manager
 MotorAndEncoderManager* motorManager;
@@ -87,6 +89,7 @@ class SetSpeedFromRCTask : public Task {
         return;
       }
 
+      // maintain a value of zero if close to zero
       if (abs(ch1Val) <= 5) {
         ch1Val = 0;
       }
