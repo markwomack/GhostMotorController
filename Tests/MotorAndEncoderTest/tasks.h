@@ -17,7 +17,9 @@
 
 class ControlMotorTask : public Task {
   public:
+    ControlMotorTask() { _singleDirection = false; };
     void setup(MotorEncoderInfo* motor, String label, uint8_t pwmSpeedPin, uint8_t motorDirPin, uint8_t brakePin);
+    void setSingleDirection(bool singleDirection);
     void start(void);
     void update(void);
     void stop(void);
@@ -28,6 +30,7 @@ class ControlMotorTask : public Task {
     uint8_t _pwmSpeedPin;
     uint8_t _brakePin;
     uint8_t _motorDirPin;
+    bool _singleDirection;
 };
 
 class CountRotationsTask :public Task {
