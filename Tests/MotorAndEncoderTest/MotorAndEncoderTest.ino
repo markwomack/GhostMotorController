@@ -11,15 +11,17 @@
 // tick and fault counts from the motor encoders, calculate the speed
 // in tick/second, or determine how many ticks/revolution your particular
 // motors support. Ideally, after using these tasks you will know:
-// 1) How many ticks per/revolution, 2) That your motor encoders are
-// not experiencing widespread faults (faults recorded when motors are
-// switching directions is acceptable), and 3) The ticks/second when the
-// motors are at full power. You can comment out code related to motor M1 or
-// M0 if you want to work with a single motor for debugging.
+//   1) How many ticks per/revolution
+//   2) That your motor encoders are not experiencing widespread faults
+//      (though faults recorded when motors are switching directions is
+//      acceptable)
+//   3) The ticks/second when the motors are at full power.
+// You can comment out code related to motor M1 or M0 if you want to work
+// with a single motor for debugging.
 //
 // This sketch assumes there is a momentary push button connected to BUTTON_PIN
-// and that it is connected HIGH (and will go LOW when pressed). Pressing the
-// button will start/stop the tasks.
+// and that it is by default connected HIGH (and will go LOW when pressed).
+// Pressing the button will start/stop the tasks.
 
 // Arduino includes
 #include <Arduino.h>
@@ -40,12 +42,12 @@
 ControlMotorTask controlM0Task;
 PrintMotorTickCountsTask printM0TickCountsTask;
 
-// Rotate motor M0 for n rotations
-CountRotationsTask countM0RotationsTask;
-
 // Control and print stats for motor M1
 ControlMotorTask controlM1Task;
 PrintMotorTickCountsTask printM1TickCountsTask;
+
+// Rotate motor M0 for n rotations
+CountRotationsTask countM0RotationsTask;
 
 // Print speeds for both motors
 PrintTickSpeedTask printTickSpeedTask;
@@ -61,15 +63,14 @@ void setupPins() {
   pinMode(M1_SPEED_PIN, OUTPUT);
   analogWrite(M1_SPEED_PIN, 0);
 
-  // TODO: put these under some kind of IFDEF
-//  // Teensy 4.1 TODO: are these valid for Teensy 4.0?
-//  // values will be 0-8191
+  // Teensy 4.1 specific
+  // PWM values will be 0-8191
   analogWriteResolution(13);
   analogWriteFrequency(M0_SPEED_PIN, 18310.55);
   analogWriteFrequency(M1_SPEED_PIN, 18310.55);
 
-  //Teensy 3.5
-  // values will be 0-4095
+   // Teensy 3.5 specific
+   // PWM values will be 0-4095
 //  analogWriteResolution(12);
 //  analogWriteFrequency(M0_SPEED_PIN, 14648.437);
 //  analogWriteFrequency(M1_SPEED_PIN, 14648.437);
@@ -99,7 +100,7 @@ void setupPins() {
   motorEncoderM0.prevWVal = digitalRead(M0_W_ENCODER_SIGNAL_PIN);
   attachInterrupt(M0_W_ENCODER_SIGNAL_PIN, countM0WTick, CHANGE);
 
-  // Set interrupt pins for M1
+  // Set interrupt pins for M1, attach interrupts
   pinMode(M1_U_ENCODER_SIGNAL_PIN, INPUT_PULLDOWN);
   motorEncoderM1.prevUVal = digitalRead(M1_U_ENCODER_SIGNAL_PIN);
   attachInterrupt(M1_U_ENCODER_SIGNAL_PIN, countM1UTick, CHANGE);
@@ -118,6 +119,7 @@ void setup() {
   // give serial some time to catch up
   delay(1000);
 
+  // Comment out to disable debug messages
   DebugMsgs.enableLevel(DEBUG);
 
   setupPins();
@@ -150,7 +152,7 @@ void setup() {
   
   taskManager.addTask(&printTickSpeedTask, 1000);
 
-  // Start the task manager to monitor the button
+  // Wait for the user to press the button to start
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);
 }
 

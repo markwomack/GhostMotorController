@@ -11,6 +11,12 @@
 #include "globals.h"
 #include "pin_assignments.h"
 
+// These are interrupt handlers attached to the pins
+// connected to the U, V, and W signals from the motor
+// encoder. Though the code is similar for each interrupt,
+// each interrupt is specific to the signal and the motor,
+// they are not shared.
+
 /**
   Interrupt handler for the M0 U encoder signal.
 **/

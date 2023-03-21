@@ -4,12 +4,14 @@
 //
 
 // This is a simple program to test the RC inputs
-// to the motor controller.
+// to the motor controller hardware.
 
+// Arduino includes
 #include <Arduino.h>
 
-#include <DebugMsgs.h>
-#include <TaskManager.h>
+// Third party includes
+#include <DebugMsgs.h>   // https://github.com/markwomack/ArduinoLogging
+#include <TaskManager.h> // https://github.com/markwomack/TaskManager
 
 const uint8_t RC_CH1_PIN(23);
 const uint8_t RC_CH2_PIN(22);

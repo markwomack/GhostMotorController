@@ -32,7 +32,7 @@ class ControlMotorTask : public Task {
 };
 
 // A task to count rotations and then stop when count detected.
-class CountRotationsTask :public Task {
+class CountRotationsTask : public Task {
   public:
     void setRotations(int numRotations);
     void update(void);

@@ -24,7 +24,7 @@ struct MotorEncoderInfo {
   char volatile prevWVal;             // Previous value read on W interrupt pin (0/1)
   char volatile prevInterrupt;        // Previous interrupt that was executed
   bool volatile actualMotorDirection; // Actual motor direction as determined by encoder signals
-  bool volatile motorDirection;       // Current motor direction
+  bool volatile motorDirection;       // Current motor direction being applied to speed
   bool incrementDirection;            // Speed increment direction (speeding up/slowing down)
   int speed;                          // Current speed (power)
 };
