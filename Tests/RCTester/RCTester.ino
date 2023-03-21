@@ -13,6 +13,7 @@
 #include <DebugMsgs.h>   // https://github.com/markwomack/ArduinoLogging
 #include <TaskManager.h> // https://github.com/markwomack/TaskManager
 
+const uint8_t RC_ENABLE_PIN(18);
 const uint8_t RC_CH1_PIN(23);
 const uint8_t RC_CH2_PIN(22);
 
@@ -41,6 +42,15 @@ void setup() {
   Serial.begin(9600);
 
   DebugMsgs.enableLevel(DEBUG);
+
+  pinMode(RC_ENABLE_PIN, INPUT);
+
+  if (digitalRead(RC_ENABLE_PIN) == LOW) {
+    DebugMsgs.debug().println("RC not enabled, exiting");
+    exit(0);
+  } else {
+    DebugMsgs.debug().println("RC enabled, starting");
+  }
   
   readRCTask1.setRCChannelPin(RC_CH1_PIN);
   readRCTask2.setRCChannelPin(RC_CH2_PIN);
