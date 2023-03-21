@@ -6,12 +6,12 @@
 #ifndef INTERRUPTS_H
 #define INTERRUPTS_H
 
-// Counts the ticks and faults for M0
+// Counts the ticks for M0
 void countM0UTick();
 void countM0VTick();
 void countM0WTick();
 
-// Counts the ticks and faults for M1
+// Counts the ticks for M1
 void countM1UTick();
 void countM1VTick();
 void countM1WTick();

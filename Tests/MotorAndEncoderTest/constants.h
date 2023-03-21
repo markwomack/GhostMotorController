@@ -6,19 +6,15 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-// Arduino includes
-#include <inttypes.h>
+// The rate at which the motor speed will be increased
+const int speedIncrement(100);
 
-// *** Modify these to limit max speed or the rate of acceleration
+// The maximum speed allowed for a motor
+// This value is based on the settings of the PWM pin set in MotorAndEncoderTest.ino.
+const int maxSpeed(8191); //8191 this value is based on the frequency set on the PWM
 
-// Number of units to increase/decrease when adjusting motor speed
-const int SPEED_INCREMENT(100);
-
-// Maximum speed allowed. This value is based on the frequency set
-// on the speed PWM pins (see pinSetup in MotorAndEncoderTest)
-const int MAX_SPEED(8191);
-
-// *** Set this to the number of ticks/rotation once you have determined it
+// Replace this value once you have determined the ticks per rotation for your motor
+// 120 is typical for built-in encoders for BLDC motors
 const int32_t NUM_TICKS_PER_ROTATION(120);
 
 #endif // CONSTANTS_H

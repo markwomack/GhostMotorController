@@ -15,7 +15,6 @@
 // Local includes
 #include "globals.h"
 
-// Task to control a motor
 class ControlMotorTask : public Task {
   public:
     void setup(MotorEncoderInfo* motor, String label, uint8_t pwmSpeedPin, uint8_t motorDirPin, uint8_t brakePin);
@@ -31,8 +30,7 @@ class ControlMotorTask : public Task {
     uint8_t _motorDirPin;
 };
 
-// A task to count rotations and then stop when count detected.
-class CountRotationsTask : public Task {
+class CountRotationsTask :public Task {
   public:
     void setRotations(int numRotations);
     void update(void);
@@ -41,7 +39,6 @@ class CountRotationsTask : public Task {
     int _numRotations;
 };
 
-// A task to print the tick and fault counts.
 class PrintMotorTickCountsTask : public Task {
   public:
     void setup(MotorEncoderInfo* motor, String label);
@@ -52,7 +49,6 @@ class PrintMotorTickCountsTask : public Task {
       String _label;
 };
 
-// A task to print the motor speeds
 class PrintTickSpeedTask : public Task {
   public:
     void start(void);

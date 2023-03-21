@@ -6,5 +6,5 @@
 #include "globals.h"
 #include "pin_assignments.h"
 
-MotorEncoderInfo motorEncoderM0;
-MotorEncoderInfo motorEncoderM1;
+MotorEncoderInfo motorM0;
+MotorEncoderInfo motorM1;

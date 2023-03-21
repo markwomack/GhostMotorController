@@ -11,20 +11,20 @@
 #include <TaskManager.h>
 
 // Local includes
-#include "pin_assignments.h"
-#include "constants.h"
-#include "globals.h"
 #include "tasks.h"
+#include "constants.h"
+#include "pin_assignments.h"
+#include "globals.h"
 
 void stopMotorsGradually() {
-  if (motorEncoderM0.speed > 0 || motorEncoderM1.speed > 0) {
+  if (motorM0.speed > 0 || motorM1.speed > 0) {
     DebugMsgs.debug().println("Stopping motors...");
     // Spin down the motor in controlled manner
-    while (motorEncoderM0.speed > 0 || motorEncoderM1.speed > 0) {
-      motorEncoderM0.speed = max(motorEncoderM0.speed - 500, 0);
-      analogWrite(M0_SPEED_PIN, motorEncoderM0.speed);
-      motorEncoderM1.speed = max(motorEncoderM1.speed - 500, 0);
-      analogWrite(M1_SPEED_PIN, motorEncoderM1.speed);
+    while (motorM0.speed > 0 || motorM1.speed > 0) {
+      motorM0.speed = max(motorM0.speed - 500, 0);
+      analogWrite(M0_SPEED_PIN, motorM0.speed);
+      motorM1.speed = max(motorM1.speed - 500, 0);
+      analogWrite(M1_SPEED_PIN, motorM1.speed);
       delay(500);
     }
     // Don't allow the motor to spin
@@ -39,8 +39,8 @@ void stopMotorsImmediately() {
   digitalWrite(M0_BRAKE_PIN, HIGH);
   analogWrite(M1_SPEED_PIN, 0);
   digitalWrite(M1_BRAKE_PIN, HIGH);
-  motorEncoderM0.speed = 0; 
-  motorEncoderM1.speed = 0; 
+  motorM0.speed = 0; 
+  motorM1.speed = 0; 
 }
 
 void ControlMotorTask::setup(MotorEncoderInfo* motor, String label, uint8_t pwmSpeedPin, uint8_t motorDirPin, uint8_t brakePin) {
@@ -59,11 +59,11 @@ void ControlMotorTask::start(void) {
   
   _motor->incrementDirection = true; // false == slow it down, true == speed it up
   _motor->speed = 0;
-  _motor->motorDirection = true;  // true == forward, false == reverse
+  _motor->motorDirection = false;  // false == forward, true == reverse
 
-  // Set up the direction, and set the speed
-  digitalWrite(_motorDirPin, _motor->motorDirection ? LOW : HIGH);
+  // Set up the speed (0) and set the direction
   analogWrite(_pwmSpeedPin, _motor->speed);
+  digitalWrite(_motorDirPin, _motor->motorDirection ? HIGH : LOW);
   
   // Allow the motor to spin
   digitalWrite(_brakePin, LOW);
@@ -72,21 +72,21 @@ void ControlMotorTask::start(void) {
 void ControlMotorTask::update(void) {
   // Motor is accelerating  
   if (_motor->incrementDirection) {
-    _motor->speed = min(_motor->speed + SPEED_INCREMENT, MAX_SPEED);
+    _motor->speed = min(_motor->speed + speedIncrement, maxSpeed);
 
     // When we match the max speed, then start decelerating
-    if (_motor->speed == MAX_SPEED) {
+    if (_motor->speed == maxSpeed) {
       _motor->incrementDirection = !_motor->incrementDirection;
     }
   // Motor is decelerating   
   } else {
-    _motor->speed = max(_motor->speed - SPEED_INCREMENT, 0);
+    _motor->speed = max(_motor->speed - speedIncrement, 0);
     
     // When we reach 0, then switch the direction of the motor
     if (_motor->speed == 0) {
       _motor->incrementDirection = !_motor->incrementDirection;
       _motor->motorDirection = !_motor->motorDirection;
-      digitalWrite(_motorDirPin, _motor->motorDirection ? LOW : HIGH);
+      digitalWrite(_motorDirPin, _motor->motorDirection ? HIGH : LOW);
     }
   }
   // Update the speed
@@ -103,7 +103,7 @@ void CountRotationsTask::setRotations(int numRotations) {
 
 void CountRotationsTask::update(void) {
   noInterrupts();
-  int32_t currentTicks = motorEncoderM0.tickCount;
+  int32_t currentTicks = motorM0.tickCount;
   interrupts();
   if (currentTicks > (_numRotations * NUM_TICKS_PER_ROTATION)) {
     stopMotorsImmediately();
@@ -122,14 +122,14 @@ void PrintMotorTickCountsTask::setup(MotorEncoderInfo* motor, String label) {
 void PrintMotorTickCountsTask::update(void) {
   DebugMsgs.debug()
     .print(_label)
-    .print(" Ticks - U: ").print(_motor->uTickCount)
+    .print(" U: ").print(_motor->uTickCount)
     .print(" V: ").print(_motor->vTickCount)
     .print(" W: ").print(_motor->wTickCount)
     .print(" tick: ").print(_motor->tickCount)
     .print(" totalInterrupts: ").println(_motor->totalInterrupts);
   DebugMsgs.debug()
     .print(_label)
-    .print(" Faults - U: ").print(_motor->uFaultCount)
+    .print(" Faults- U: ").print(_motor->uFaultCount)
     .print(" V: ").print(_motor->vFaultCount)
     .print(" W: ").println(_motor->wFaultCount);
 }
@@ -141,8 +141,8 @@ void PrintTickSpeedTask::start(void) {
 };
 
 void PrintTickSpeedTask::update(void) {
-  int32_t curM0TickCount = motorEncoderM0.tickCount;
-  int32_t curM1TickCount = motorEncoderM1.tickCount;
+  int32_t curM0TickCount = motorM0.tickCount;
+  int32_t curM1TickCount = motorM1.tickCount;
   int32_t curTickTime = millis();
   
   if (lastTickCountTime != 0) {
@@ -150,8 +150,8 @@ void PrintTickSpeedTask::update(void) {
     int32_t diffM0Ticks = abs(curM0TickCount - lastM0TickCount);
     int32_t diffM1Ticks = abs(curM1TickCount - lastM1TickCount);
 
-    DebugMsgs.debug().print("M0 ticks/second: ").print(diffM0Ticks * (1000/diffTime)).print(", speed: ").println(motorEncoderM0.speed);
-    DebugMsgs.debug().print("M1 ticks/second: ").print(diffM1Ticks * (1000/diffTime)).print(", speed: ").println(motorEncoderM1.speed);
+    DebugMsgs.debug().print("M0 ticks/second: ").print(diffM0Ticks * (1000/diffTime)).print(", speed: ").println(motorM0.speed);
+    DebugMsgs.debug().print("M1 ticks/second: ").print(diffM1Ticks * (1000/diffTime)).print(", speed: ").println(motorM1.speed);
   }
 
   lastM0TickCount = curM0TickCount;
