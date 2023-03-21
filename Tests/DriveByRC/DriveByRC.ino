@@ -143,9 +143,17 @@ AdjustSpeedsTask adjustSpeedsTask;
 
 void setup() {
   Serial.begin(9600);
+  delay(1000); // Give serial a chance to catch up
 
   // Comment out to disable debug output
   DebugMsgs.enableLevel(DEBUG);
+
+  pinMode(RC_ENABLE_PIN, INPUT);
+  if (digitalRead(RC_ENABLE_PIN) == LOW) {
+    DebugMsgs.debug().println("RC IS NOT ENABLED, exiting");
+    Serial.flush();
+    exit(0);
+  }
   
   // RC Channel inputs
   pinMode(RC_CH1_PIN, INPUT);
