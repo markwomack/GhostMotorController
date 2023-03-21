@@ -31,7 +31,6 @@
 #include <DebugMsgs.h>   // https://github.com/markwomack/ArduinoLogging
 #include <TaskManager.h> // https://github.com/markwomack/TaskManager
 #include <Task.h>
-#include <Task.h>
 
 // Local includes
 #include "pin_assignments.h"
@@ -45,6 +44,7 @@ PrintMotorTickCountsTask printM0TickCountsTask;
 PrintMotorTickCountsTask printM1TickCountsTask;
 CountRotationsTask countM0RotationsTask;
 PrintTickSpeedTask printTickSpeedTask;
+
 BlinkTask idleTask;
 
 void setupPins() {
