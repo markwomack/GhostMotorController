@@ -40,6 +40,7 @@ ReadRCTask readRCTask2;
 
 void setup() {
   Serial.begin(9600);
+  delay(500); // Give serial a chance to catch up
 
   DebugMsgs.enableLevel(DEBUG);
 
