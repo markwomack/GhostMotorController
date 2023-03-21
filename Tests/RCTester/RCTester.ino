@@ -47,6 +47,7 @@ void setup() {
 
   if (digitalRead(RC_ENABLE_PIN) == LOW) {
     DebugMsgs.debug().println("RC not enabled, exiting");
+    Serial.flush();
     exit(0);
   } else {
     DebugMsgs.debug().println("RC enabled, starting");
