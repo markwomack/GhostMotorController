@@ -50,6 +50,10 @@ void ControlMotorTask::setup(MotorEncoderInfo* motor, String label, uint8_t pwmS
   _motorDirPin = motorDirPin;
   _brakePin = brakePin;
 }
+
+void ControlMotorTask::setSingleDirection(bool singleDirection) {
+  _singleDirection = singleDirection;
+}
     
 void ControlMotorTask::start(void) {
   // Clear the counts
@@ -75,7 +79,7 @@ void ControlMotorTask::update(void) {
     _motor->speed = min(_motor->speed + speedIncrement, maxSpeed);
 
     // When we match the max speed, then start decelerating
-    if (_motor->speed == maxSpeed) {
+    if (_motor->speed == maxSpeed && !_singleDirection) {
       _motor->incrementDirection = !_motor->incrementDirection;
     }
   // Motor is decelerating   
