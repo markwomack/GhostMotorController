@@ -10,8 +10,8 @@
 #include <Arduino.h>
 
 // Third Party includes
-#include <DebugMsgs.h>   // https://github.com/markwomack/ArduinoLogging
-#include <TaskManager.h> // https://github.com/markwomack/TaskManager
+#include <DebugMsgs.h>               // https://github.com/markwomack/ArduinoLogging
+#include <TaskManager.h>             // https://github.com/markwomack/TaskManager
 #include <BlinkTask.h>
 #include <MotorAndEncoderManager.h>  // https://github.com/markwomack/MotorAndEncoderManager
 #include <MotorController.h>         // https://github.com/markwomack/MotorAndEncoderManager
@@ -34,22 +34,37 @@ BlinkTask idleTask;
 // from two RC signals.
 class SetSpeedFromRCTask : public Task {
   public:
+    SetSpeedFromRCTask() {
+      _useMotorController = false;
+    };
+    
     void setRCPins(uint8_t chan1Pin, uint8_t chan2Pin) {
       _chan1Pin = chan1Pin;
       _chan2Pin = chan2Pin;
+    };
+
+    void useMotorController(bool useMotorController) {
+      _useMotorController = useMotorController;
     };
     
     void start(void) {
       digitalWrite(M0_BRAKE_PIN, LOW);
       digitalWrite(M1_BRAKE_PIN, LOW);
-      motorController->start();
-      motorController->setDesiredSpeeds(0, 0);
+      if (_useMotorController) {
+        motorController->start();
+        motorController->setDesiredSpeeds(0, 0);
+      } else {
+        motorManager->setMotorSpeeds(0, 0);
+      }
     };
     
     void stop(void) {
       digitalWrite(M0_BRAKE_PIN, HIGH);
       digitalWrite(M1_BRAKE_PIN, HIGH);
-      motorController->stop();
+      if (_useMotorController) {
+        motorController->stop();
+      }
+      motorManager->setMotorSpeeds(0, 0);
     };
 
     // Reads the current RC signal on the given pin, returns it
@@ -64,7 +79,9 @@ class SetSpeedFromRCTask : public Task {
 
     // Performs a controlled stop on both motors
     void performControlledStop(void) {
-      motorController->setDesiredSpeeds(0, 0);
+      if (_useMotorController) {
+        motorController->setDesiredSpeeds(0, 0);
+      }
       uint32_t checkTime = 0;
       int32_t lastM0EncoderCount = 0;
       int32_t lastM1EncoderCount = 0;
@@ -77,12 +94,12 @@ class SetSpeedFromRCTask : public Task {
           }
           lastM0EncoderCount = curM0EncoderCount;
           lastM1EncoderCount = curM1EncoderCount;
-          checkTime = millis() + 5;
+          checkTime = millis() + 10;
         }
       }
     };
     
-    // Called periodically to set the desired moto speeds from the
+    // Called periodically to set the desired motor speeds from the
     // the RC signals.
     void update(void) {
 
@@ -122,10 +139,15 @@ class SetSpeedFromRCTask : public Task {
       DebugMsgs.debug().print("Setting speeds: ").print(m0Speed).print(" : ").println(m1Speed);
 
       // Set the desired speeds on the motor controller
-      motorController->setDesiredSpeeds(m0Speed, m1Speed);
+      if (_useMotorController) {
+        motorController->setDesiredSpeeds(m0Speed, m1Speed);
+      } else {
+        motorManager->setMotorSpeeds(m0Speed, m1Speed);
+      }
     };
 
   private:
+    bool _useMotorController;
     uint8_t _chan1Pin;
     uint8_t _chan2Pin;
 };
