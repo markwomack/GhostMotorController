@@ -33,8 +33,7 @@
 
 ## Microcontroller
   - 1 - [Teensy 4.0](https://www.pjrc.com/store/teensy40.html)
-  - 4 - [Logic Converter](https://www.sparkfun.com/products/12009)
-  - 1 - [Level Translator](https://www.sparkfun.com/products/15439)
+  - 5 - [Logic Converter](https://www.sparkfun.com/products/12009)
   - 2 - [Hex Inverters with Schmitt Triggers IC chips)](https://www.digikey.com/en/products/detail/texas-instruments/SN74HC14N/277223)
   - 6 - [1000pF capacitors](https://www.digikey.com/en/products/detail/vishay-beyschlag-draloric-bc-components/A102K15X7RF5TAA/2356716)
   - 1 - Momentary pushbutton
