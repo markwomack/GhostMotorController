@@ -5,7 +5,7 @@
 <p>Ghost is currently in the 'proof-of-concept' phase. Most of the time thus far has been spent choosing the initial set of parts, getting a power system in place to support the parts, and designing the first version of circuitry that will make up the motor controller. The power system, motors, and a control circuit has been designed and tested. A custom PCB has been designed and will be integrated with the test system soon.</p>
 
 ## Hardware
-Instead of creating a custom circuit to control the motors, an existing eScooter controller is being used. But since this controller doesn't have a programmatic interface, a microcontroller circuit is being designed. Basically a controller of a controller. This is the Ghost Motor Controller. The hardware will support I2C, 2 RC channel inputs, and a serial port for debugging output.
+Instead of creating a custom circuit to control the motors, an existing eScooter controller is being used. But since this controller doesn't have a programmatic interface, a microcontroller circuit is being designed. Basically a controller of a controller. This is the Ghost Motor Controller. The hardware will support I2C, 3 RC channel inputs, and a serial port for debugging output.
 
 ## Software
 The Ghost Motor Controller will provide an API accessible through I2C. Using this API the user will be able to set/get configuration and set/get information and actions on the motors and associated encoders. Everything one needs to control the motors on a mobile, differential drive robot will be provided. It will be very similar to existing APIs for other popular controllers, like the RoboClaw.
