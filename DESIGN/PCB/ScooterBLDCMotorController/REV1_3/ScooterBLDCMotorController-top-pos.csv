@@ -1,0 +1,38 @@
+Designator,Val,Package,Mid X,Mid Y,Rotation,Layer
+C1,.001uF,C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal,139.232,-129.667,0,top
+C2,.001uF,C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal,139.232,-133.731,0,top
+C3,.001uF,C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal,139.232,-137.795,0,top
+C4,.001uF,C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal,179.892,-129.667,0,top
+C5,.001uF,C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal,187.392,-133.731,180,top
+C6,.001uF,C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal,187.392,-137.795,180,top
+D1,1N6857,D_DO-35_SOD27_P7.62mm_Horizontal,173.99,-47.752,0,top
+J1,M1 OUTPUT,TerminalBlock_Altech_AK300-3_P5.00mm,94.498,-52.793,90,top
+J2,TO M1 ENCODER,JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical,112.014,-97.028,-90,top
+J3,M1 INPUT,TerminalBlock_Altech_AK300-5_P5.00mm,133.205,-134.366,180,top
+J4,M2 OUTPUT,TerminalBlock_Altech_AK300-3_P5.00mm,202.692,-42.418,-90,top
+J5,I2C,JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical,161.4062,-47.8366,0,top
+J6,TEST SWITCH,JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical,112.034,-68.419,0,top
+J7,RC CH 1,JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,137.414,-52.8828,90,top
+J8,RC CH 2,JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,129.2098,-52.8828,90,top
+J9,RC_PWR,PinHeader_1x02_P2.54mm_Vertical,112.522,-50.3174,-90,top
+J10,RC_ENABLE,PinHeader_1x02_P2.54mm_Vertical,112.522,-55.7022,-90,top
+J11,TO M2 ENCODER,JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical,186.419,-107.108,90,top
+J12,M2 INPUT,TerminalBlock_Altech_AK300-5_P5.00mm,173.83,-134.366,180,top
+J13,Conn_01x01_Male,PinHeader_1x01_P2.54mm_Vertical,108.204,-116.84,0,top
+J14,Conn_01x01_Male,PinHeader_1x01_P2.54mm_Vertical,186.69,-82.804,0,top
+J15,RC CH 3,JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,120.8108,-52.8682,90,top
+POWER1,5v,JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical,181.61,-53.848,-90,top
+R1,R,R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal,117.044,-74.786,180,top
+R2,R,R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal,158.9786,-54.6354,0,top
+R3,R,R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal,158.9786,-57.7854,0,top
+SERIAL1,SERIAL,JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical,148.4322,-47.8366,0,top
+U1, ,Level Shifter,130.81,-103.378,90,top
+U2,SN74HC14NR,DIP-14_W7.62mm,141.015,-116.706,-90,top
+U3, ,Level Shifter,151.13,-103.378,90,top
+U4,Teensy4.0,Teensy40_sides,150.368,-84.946,0,top
+U5,SN74HC14NR,DIP-14_W7.62mm,165.399,-116.706,-90,top
+U6, ,Level Shifter,170.18,-103.378,90,top
+U7, ,Level Shifter,151.384,-66.802,-90,top
+U8,5V_StepUpDown_Voltage_Regulator,StepUpDown Voltage Regulator,167.894,-56.388,-90,top
+U9,3V_StepUpDown_Voltage_Regulator,StepUpDown Voltage Regulator,167.892,-68.326,-90,top
+U10, ,Level Shifter,127.548,-66.658,-90,top
