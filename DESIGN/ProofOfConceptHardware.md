@@ -21,7 +21,7 @@
   - 1 - [36v ebike lithium ion battery](https://www.amazon.com/dp/B08FWRZYJ3)
   - 1 - [Battery Disconnect Switch](https://www.amazon.com/dp/B08YXGXW2W)
   - 1 - [Inline Fuse Holder](https://www.amazon.com/dp/B081DHT8Y7)
-  - 2 - [24v DC regulator](https://www.amazon.com/dp/B06Y5JVHX8)
+  - 2 - [24v DC regulator](https://www.amazon.com/gp/product/B098D8HMJ9)
   - 1 - [5v DC step-down regulator](https://www.amazon.com/dp/B07YCQTSXQ)
   - 2 - [Shunt Regulator](https://www.pololu.com/product/3779)
   - 1 - [Mini Pushbutton Power Switch with Reverse Voltage Protection](https://www.pololu.com/product/2808)
