@@ -91,6 +91,7 @@ void setup() {
   taskManager.addBlinkTask(500);
   taskManager.addTask(&speedFromRCTask, 50);
   taskManager.addTask(&adjustSpeedsTask, 10);
+  taskManager.addTask(&checkForOTATask, 1000);
 
   // Wait for the user to press the button to start
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);

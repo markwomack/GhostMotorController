@@ -47,7 +47,7 @@ void SpeedFromRCTask::update(void) {
   int ch1Val = readChannel(_chan1Pin, -100, 100);
   int ch2Val = readChannel(_chan2Pin, -100, 100);
 
-  DebugMsgs.debug().print("RC Channels: ").print(ch1Val).print(" : ").println(ch2Val);
+  //DebugMsgs.debug().print("RC Channels: ").print(ch1Val).print(" : ").println(ch2Val);
 
   // If either channel has been lost, then stop the robot, stop all the tasks.
   if (ch1Val == NO_RC_SIGNAL || ch2Val == NO_RC_SIGNAL) {
@@ -75,7 +75,7 @@ void SpeedFromRCTask::update(void) {
   _m0Speed = _linearVelocity - _angularVelocity;
   _m1Speed = _linearVelocity + _angularVelocity;
   
-  DebugMsgs.debug().print("Setting speeds: ").print(_m0Speed).print(" : ").println(_m1Speed);
+  //DebugMsgs.debug().print("Setting speeds: ").print(_m0Speed).print(" : ").println(_m1Speed);
 }
 
 double SpeedFromRCTask::getM0Speed() {
