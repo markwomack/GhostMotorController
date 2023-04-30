@@ -121,9 +121,12 @@ class PushIncomingTCPToSerialTask : public Task {
       // If a client was returned, store it for future use
       // and indicate an OTA is now available
       if (tcpClient) {
+        DebugMsgs.debug().println("New tcp data available");
+        uint32_t size = 0;
         while (tcpClient.available()) {
-          _serial->write(tcpClient.read());
+          size += _serial->write(tcpClient.read());
         }
+        DebugMsgs.debug().print("All data sent ").println(size);
       }
     }
 
