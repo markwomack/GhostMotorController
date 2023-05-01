@@ -31,13 +31,12 @@ MotorAndEncoderManager* motorManager;
 // Motor Controller
 MotorController* motorController;
 
-BlinkTask idleTask;
 SpeedFromRCTask speedFromRCTask;
 AdjustSpeedsTask adjustSpeedsTask;
 CheckForOTATask checkForOTATask;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial5.begin(115200);
   delay(1000); // Give serials a chance to catch up
 
@@ -47,7 +46,7 @@ void setup() {
   pinMode(RC_ENABLE_PIN, INPUT);
   if (digitalRead(RC_ENABLE_PIN) == LOW) {
     DebugMsgs.debug().println("RC IS NOT ENABLED, exiting");
-    Serial.flush();
+    DebugMsgs.flush();
     exit(0);
   }
   
@@ -86,8 +85,11 @@ void setup() {
   // Set the serial port to be monitored
   checkForOTATask.setSerial(&Serial5);
 
-  // Set up the task manager with tasks
-  taskManager.addIdleTask(&idleTask, 100);
+  // Set up the task manager with idle tasks
+  taskManager.addIdleBlinkTask(100);
+  taskManager.addIdleTask(&checkForOTATask, 1000);
+
+  // Set up the task manager with regular tasks
   taskManager.addBlinkTask(500);
   taskManager.addTask(&speedFromRCTask, 50);
   taskManager.addTask(&adjustSpeedsTask, 10);
