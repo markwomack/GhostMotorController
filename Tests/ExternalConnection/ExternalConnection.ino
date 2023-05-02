@@ -57,8 +57,9 @@ class RemoteSerialReaderTask : public Task {
     char buffer[256];
 };
 
-#define INCOMING_BUFFER_SIZE 4096
-uint8_t incomingBuffer[INCOMING_BUFFER_SIZE];
+#define SERIAL_BUFFER_SIZE 4096
+uint8_t incomingBuffer[SERIAL_BUFFER_SIZE];
+uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
 TCPToSerialTask tcpToSerialTask;
 CheckForOTATask checkForLocalOTATask;
@@ -67,7 +68,8 @@ RemoteSerialReaderTask remoteSerialReaderTask;
 void setup() {
   Serial.begin(115200);
   Serial5.begin(115200);
-  Serial5.addMemoryForRead(incomingBuffer, INCOMING_BUFFER_SIZE);
+  Serial5.addMemoryForRead(incomingBuffer, SERIAL_BUFFER_SIZE);
+  Serial5.addMemoryForWrite(outgoingBuffer, SERIAL_BUFFER_SIZE);
   delay(500);
   
   DebugMsgs.enableLevel(DEBUG);
