@@ -19,6 +19,7 @@
 #include <WiFiServer.h>
 
 // Local includes
+#include "constants.h"
 #include "MyNetworkHub.h"
 #include "pin_assignments.h"
 #include "secrets.h"
@@ -40,6 +41,9 @@ int MyNetworkHub::start(void) {
 
   // Make sure right pins are set for Wifi
   WiFi.setPins(WIFI_SPI_CS0_PIN, WIFI_BUSY_PIN, WIFI_RESET_PIN, WIFI_GPIO_PIN);
+
+  // Set our static ip address
+  WiFi.config(HOST_IP_ADDRESS);
 
   DebugMsgs.debug().print("Found firmware ").println(WiFi.firmwareVersion());
   
@@ -92,7 +96,7 @@ WiFiServer* MyNetworkHub::getTCPServer(uint32_t portNum) {
   return tcpServer;
 }
 
-void printWifiStatus(void) {
+void MyNetworkHub::printWifiStatus(void) {
   // print the SSID of the network you're attached to:
   DebugMsgs.debug().print("SSID: ").println(WiFi.SSID());
 

@@ -42,6 +42,7 @@ class TCPToSerialTask : public Task {
           totalSize += _serial->write(buffer, size);
         }
         DebugMsgs.debug().print("All data sent: ").println(totalSize);
+        tcpClient.stop();
       }
     }
 

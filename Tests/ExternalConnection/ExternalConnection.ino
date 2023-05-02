@@ -10,6 +10,7 @@
 
 // My includes
 #include <DebugMsgs.h>   // https://github.com/markwomack/ArduinoLogging
+#include <CascadePrinter.h>
 #include <UDPPrintWrapper.h>
 #include <TaskManager.h> // https://github.com/markwomack/TaskManager
 
@@ -22,12 +23,51 @@
 
 MyNetworkHub networkHub;
 
+CascadePrinter xferPrinter;
+
+class RemoteSerialReaderTask : public Task {
+  public:
+    void setSrcSerial(HardwareSerial* srcSerial) {
+      _srcSerial = srcSerial;
+    };
+
+    void update(void) {
+      if (_srcSerial->available()) {
+        uint32_t size = _srcSerial->readBytesUntil('\r', buffer, 255);
+        if (size == 0) {
+          return;
+        }
+
+        buffer[size] = 0;
+        xferPrinter.print(buffer);
+        
+        int nextByte = _srcSerial->read();
+        if (nextByte == -1) {
+          return;
+        } else if (nextByte == '\n') {
+          xferPrinter.println();
+        } else {
+          xferPrinter.print((char)nextByte);
+        }
+      }
+    };
+
+  private:
+    HardwareSerial* _srcSerial;
+    char buffer[256];
+};
+
+#define INCOMING_BUFFER_SIZE 4096
+uint8_t incomingBuffer[INCOMING_BUFFER_SIZE];
+
 TCPToSerialTask tcpToSerialTask;
 CheckForOTATask checkForLocalOTATask;
+RemoteSerialReaderTask remoteSerialReaderTask;
 
 void setup() {
   Serial.begin(115200);
   Serial5.begin(115200);
+  Serial5.addMemoryForRead(incomingBuffer, INCOMING_BUFFER_SIZE);
   delay(500);
   
   DebugMsgs.enableLevel(DEBUG);
@@ -36,14 +76,19 @@ void setup() {
 
   // Connect to WiFi network, create a TCP port to monitor
   if (networkHub.start() == 0) {
-
-    DebugMsgs.print("Switching to UDP for debug messages: ").print(UDP_TARGET_ADDRESS).print(":").println(UDP_TARGET_PORT);
+    
+    DebugMsgs.print("Switching to UDP for debug messages: ").print(TARGET_IP_ADDRESS).print(":").println(UDP_TARGET_PORT1);
     UDPPrintWrapper* udpPrint =
-        new UDPPrintWrapper(networkHub.getUdpPort(DEBUG_UDP_PORT), UDP_TARGET_ADDRESS, UDP_TARGET_PORT);
+        new UDPPrintWrapper(networkHub.getUdpPort(DEBUG_UDP_PORT1), TARGET_IP_ADDRESS, UDP_TARGET_PORT1);
       
     DebugMsgs.setPrint(udpPrint);
     DebugMsgs.println("Starting debug messages through remote udp");
-    
+
+    // set up the remote xfer printer
+    UDPPrintWrapper* xferUdpPrint =
+        new UDPPrintWrapper(networkHub.getUdpPort(DEBUG_UDP_PORT2), TARGET_IP_ADDRESS, UDP_TARGET_PORT2);
+    xferPrinter.setPrint(xferUdpPrint);
+        
     WiFiServer* tcpServer1 = networkHub.getTCPServer(TCP_SERVER_PORT_1);
     tcpToSerialTask.setTCPServer(tcpServer1);
 
@@ -54,13 +99,20 @@ void setup() {
     while (true) {;}
   }
 
+  networkHub.printWifiStatus();
+
   tcpToSerialTask.setSerial(&Serial5);
+  
+  remoteSerialReaderTask.setSrcSerial(&Serial5);
   
   // This task will check the TCP port for the remote OTA every second
   taskManager.addTask(&tcpToSerialTask, 1000);
 
   // This task will check the TCP port for a local OTA every half second
   taskManager.addTask(&checkForLocalOTATask, 500);
+
+  // This task will read from the 'remote' serial and xfer to udp
+  taskManager.addTask(&remoteSerialReaderTask, 5);
 
   // This LED will blink (half second) during normal operations of the sketch
   taskManager.addBlinkTask(LED_STATUS_PIN, 500);

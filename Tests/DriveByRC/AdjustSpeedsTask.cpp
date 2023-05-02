@@ -96,6 +96,18 @@ void AdjustSpeedsTask::update(void) {
     _motorController->adjustSpeeds();
   } else {
     // set speed according to an acceleration/deceleration ramp
+    double m0Diff = userM0Speed - _targetM0Speed;
+    double m0Increment = (m0Diff >= 0) ? min(0.1, m0Diff) : max(-0.1, m0Diff);
+    double m1Diff = userM1Speed - _targetM1Speed;
+    double m1Increment = (m1Diff >= 0) ? min(0.1, m1Diff) : max(-0.1, m1Diff);
+    
+    _targetM0Speed += m0Increment;
+    _targetM1Speed += m1Increment;
+    
+    DebugMsgs.debug().print("Setting motor speeds: ").print(_targetM0Speed).print(" ").println(_targetM1Speed);
+    DebugMsgs.debug().print("Setting motor speeds: ").print(_targetM0Speed).print(" ").print(_targetM1Speed)
+      .print(" ").print(m0Diff).print(" ").println(m1Diff);
+
     _motorManager->setMotorSpeeds(_targetM0Speed, _targetM1Speed);
   }
 }

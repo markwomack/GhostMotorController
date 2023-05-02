@@ -31,6 +31,9 @@ MotorAndEncoderManager* motorManager;
 // Motor Controller
 MotorController* motorController;
 
+#define INCOMING_BUFFER_SIZE 4096
+uint8_t incomingBuffer[INCOMING_BUFFER_SIZE];
+
 SpeedFromRCTask speedFromRCTask;
 AdjustSpeedsTask adjustSpeedsTask;
 CheckForOTATask checkForOTATask;
@@ -38,11 +41,18 @@ CheckForOTATask checkForOTATask;
 void setup() {
   Serial.begin(115200);
   Serial5.begin(115200);
+  Serial5.addMemoryForRead(incomingBuffer, INCOMING_BUFFER_SIZE);
   delay(1000); // Give serials a chance to catch up
 
   // Comment out to disable debug output
   DebugMsgs.enableLevel(DEBUG);
 
+  // All output now goes to Serial5
+  DebugMsgs.setPrint(new PrintWrapper(&Serial5));
+
+
+  DebugMsgs.debug().println("Starting Drive By RC");
+  
   pinMode(RC_ENABLE_PIN, INPUT);
   if (digitalRead(RC_ENABLE_PIN) == LOW) {
     DebugMsgs.debug().println("RC IS NOT ENABLED, exiting");
