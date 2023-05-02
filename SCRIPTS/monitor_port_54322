@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+while true
+do
+  nc -ulp 54322
+done
