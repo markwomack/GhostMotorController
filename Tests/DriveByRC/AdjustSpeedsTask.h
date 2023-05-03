@@ -9,7 +9,7 @@
 #include <MotorAndEncoderManager.h>
 #include <MotorController.h>
 
-#include "SpeedFromRCTask.h"
+#include "ReadFromRCTask.h"
 
 // Task to allow the motor controller to periodically adjust
 // the motor speeds to match the current desired speeds
@@ -19,7 +19,7 @@ class AdjustSpeedsTask : public Task {
     
     void useMotorController(bool useMotorController);
     void setMotorManagerAndController(MotorAndEncoderManager* motorManager, MotorController* motorController);
-    void setSpeedFromRCTask(SpeedFromRCTask* speedFromRCTask);
+    void setReadFromRCTask(ReadFromRCTask* readFromRCTask);
     void start(void);
     
     void stop(void);
@@ -36,9 +36,11 @@ class AdjustSpeedsTask : public Task {
     bool _stopped;
     MotorAndEncoderManager* _motorManager;
     MotorController* _motorController;
-    SpeedFromRCTask* _speedFromRCTask;
+    ReadFromRCTask* _readFromRCTask;
     double _targetM0Speed;
     double _targetM1Speed;
+    double _linearVelocity;
+    double _angularVelocity;
 };
 
 #endif // ADJUSTSPEEDSTASK_H

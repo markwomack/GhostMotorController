@@ -21,7 +21,7 @@
 // Local includes
 #include "globals.h"
 #include "pin_assignments.h"
-#include "SpeedFromRCTask.h"
+#include "ReadFromRCTask.h"
 #include "AdjustSpeedsTask.h"
 #include "CheckForOTATask.h"
 
@@ -35,7 +35,7 @@ MotorController* motorController;
 uint8_t incomingBuffer[SERIAL_BUFFER_SIZE];
 uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
-SpeedFromRCTask speedFromRCTask;
+ReadFromRCTask readFromRCTask;
 AdjustSpeedsTask adjustSpeedsTask;
 CheckForOTATask checkForOTATask;
 
@@ -50,7 +50,7 @@ void setup() {
   DebugMsgs.enableLevel(DEBUG);
 
   // All output now goes to Serial5
-  DebugMsgs.setPrint(new PrintWrapper(&Serial5));
+  DebugMsgs.setPrint(new FlushingPrintWrapper(new PrintWrapper(&Serial5)));
 
   DebugMsgs.debug().println("Starting Drive By RC");
   
@@ -80,18 +80,19 @@ void setup() {
 
   DebugMsgs.debug().print("RADIANS_PER_TICK: ").println(RADIANS_PER_TICK);
   DebugMsgs.debug().print("MAX_RADIANS_PER_SECOND: ").println(MAX_RADIANS_PER_SECOND);
-  DebugMsgs.debug().print("MAX_LINEAR_VELOCITY: ").println(MAX_LINEAR_VELOCITY);
-  DebugMsgs.debug().print("MAX_ANGULAR_VELOCITY: ").println(MAX_ANGULAR_VELOCITY);
+  DebugMsgs.debug().print("MAX_LINEAR_VELOCITY_ALLOWED: ").println(MAX_LINEAR_VELOCITY_ALLOWED);
+  DebugMsgs.debug().print("MAX_ANGULAR_VELOCITY_ALLOWED: ").println(MAX_ANGULAR_VELOCITY_ALLOWED);
 
   // Create the motor controller
   motorController = new MotorController(motorManager, KP, KI, KD, 50, RADIANS_PER_TICK, MAX_RADIANS_PER_SECOND);
 
   // Set the RC pins into the setSpeedFromRCTask
-  speedFromRCTask.setRCPins(RC_CH1_PIN, RC_CH2_PIN);
+  readFromRCTask.setRCPins(RC_CH1_PIN, RC_CH2_PIN);
 
   // Set the needed references into the adjustSpeedsTask
   adjustSpeedsTask.setMotorManagerAndController(motorManager, motorController);
-  adjustSpeedsTask.setSpeedFromRCTask(&speedFromRCTask);
+  adjustSpeedsTask.setReadFromRCTask(&readFromRCTask);
+  adjustSpeedsTask.useMotorController(false);
 
   // Set the serial port to be monitored
   checkForOTATask.setSerial(&Serial5);
@@ -102,8 +103,8 @@ void setup() {
 
   // Set up the task manager with regular tasks
   taskManager.addBlinkTask(500);
-  taskManager.addTask(&speedFromRCTask, 50);
-  taskManager.addTask(&adjustSpeedsTask, 10);
+  taskManager.addTask(&readFromRCTask, 50);
+  taskManager.addTask(&adjustSpeedsTask, 50);
   taskManager.addTask(&checkForOTATask, 1000);
 
   // Wait for the user to press the button to start

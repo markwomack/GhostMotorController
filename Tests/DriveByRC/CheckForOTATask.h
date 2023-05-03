@@ -41,28 +41,30 @@ class CheckForOTATask : public Task {
     // methods.
     void performUpdate() {
       if (!_otaIsAvailable) {
-        Serial.printf( "no ota update available\n" );
+        DebugMsgs.debug().println( "no ota update available" );
         return;
       }
+
+      DebugMsgs.debug().println("Starting OTA update");
       uint32_t buffer_addr;
       uint32_t buffer_size;
     
       // create flash buffer to hold new firmware
       if (firmware_buffer_init( &buffer_addr, &buffer_size ) == 0) {
-        Serial.printf( "unable to create buffer\n" );
-        Serial.flush();
+        DebugMsgs.debug().println( "unable to create buffer" );
+        DebugMsgs.flush();
         return;
       }
       
       Serial.printf( "created buffer = %1luK %s (%08lX - %08lX)\n",
-       buffer_size/1024, IN_FLASH(buffer_addr) ? "FLASH" : "RAM",
+        buffer_size/1024, IN_FLASH(buffer_addr) ? "FLASH" : "RAM",
         buffer_addr, buffer_addr + buffer_size );
     
       update_firmware((Stream*)_serial, (Stream*)&Serial, buffer_addr, buffer_size);
       
       // return from update_firmware() means error, so clean up and
       // reboot to ensure that static vars get boot-up initialized before retry
-      Serial.printf( "erase FLASH buffer / free RAM buffer...\n" );
+      DebugMsgs.debug().println( "erase FLASH buffer / free RAM buffer..." );
       firmware_buffer_free( buffer_addr, buffer_size );
       Serial.flush();
       REBOOT;

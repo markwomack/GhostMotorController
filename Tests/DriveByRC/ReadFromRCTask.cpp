@@ -10,13 +10,13 @@
 
 #include "pin_assignments.h"
 #include "globals.h"
-#include "SpeedFromRCTask.h"
+#include "ReadFromRCTask.h"
 
-SpeedFromRCTask::SpeedFromRCTask() {
+ReadFromRCTask::ReadFromRCTask() {
   // Nothing here!
 }
     
-void SpeedFromRCTask::setRCPins(uint8_t chan1Pin, uint8_t chan2Pin) {
+void ReadFromRCTask::setRCPins(uint8_t chan1Pin, uint8_t chan2Pin) {
   _chan1Pin = chan1Pin;
   _chan2Pin = chan2Pin;
 }
@@ -24,24 +24,21 @@ void SpeedFromRCTask::setRCPins(uint8_t chan1Pin, uint8_t chan2Pin) {
 // Reads the current RC signal on the given pin, returns it
 // as a value between minLimit and maxLimit. Returns NO_RC_SIGNAL
 // if there is no RC signal.
-int SpeedFromRCTask::readChannel(int channelPin, int minLimit, int maxLimit) {
+int ReadFromRCTask::readChannel(int channelPin, int minLimit, int maxLimit) {
   int ch = pulseIn(channelPin, HIGH, 30000);
   if (ch < 100) return NO_RC_SIGNAL;
   int value = map(ch, 1020, 1980, minLimit, maxLimit);
   return min(max(minLimit, value), maxLimit);
 }
 
-void SpeedFromRCTask::start(void) {
-  _m0Speed = 0;
-  _m1Speed = 0;
-  _linearVelocity = 0;
-  _angularVelocity = 0;
-
+void ReadFromRCTask::start(void) {
+  _signal1Value = 0;
+  _signal2Value = 0;
 }
 
 // Called periodically to set the desired motor speeds from the
 // the RC signals.
-void SpeedFromRCTask::update(void) {
+void ReadFromRCTask::update(void) {
 
   // Read the current RC signals on both channels
   int ch1Val = readChannel(_chan1Pin, -100, 100);
@@ -65,23 +62,14 @@ void SpeedFromRCTask::update(void) {
     ch2Val = 0;
   }
 
-  // Channel 2 is for linear (forward/reverse) velocity
-  _linearVelocity = ((double)ch2Val/100.0) * MAX_LINEAR_VELOCITY;
-
-  // Channel 1 is for angular (left/right) velocity
-  _angularVelocity = ((double)ch1Val/100.0) * MAX_ANGULAR_VELOCITY;
-
-  // Calculate the motor speeds to match
-  _m0Speed = _linearVelocity - _angularVelocity;
-  _m1Speed = _linearVelocity + _angularVelocity;
-  
-  //DebugMsgs.debug().print("Setting speeds: ").print(_m0Speed).print(" : ").println(_m1Speed);
+  _signal1Value = ((double)ch1Val/100.0);
+  _signal2Value = ((double)ch2Val/100.0);
 }
 
-double SpeedFromRCTask::getM0Speed() {
-  return _m0Speed;
+double ReadFromRCTask::getSignal1Value() {
+  return _signal1Value;
 }
 
-double SpeedFromRCTask::getM1Speed() {
-  return _m1Speed;
+double ReadFromRCTask::getSignal2Value() {
+  return _signal2Value;
 }
