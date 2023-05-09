@@ -17,6 +17,7 @@
 #include <MotorController.h>         // https://github.com/markwomack/MotorAndEncoderManager
 #include <GhostMotorManager.h>
 #include <ThreePhaseMotorEncoder.h>
+#include <RampedMotorPID.h>
 
 // Local includes
 #include "globals.h"
@@ -78,21 +79,25 @@ void setup() {
   motorManager = (MotorAndEncoderManager*)ghostMotorManager;
   motorManager->setEncoders(m0ThreePhaseEncoder, m1ThreePhaseEncoder);
 
+  // Should MAX_SPEED_INCREMENT_ALLOWED be adjusted to the frequency adjustSpeedsTask will be called?
+  MotorPID* m0MotorPID = new RampedMotorPID(MAX_SPEED_INCREMENT_ALLOWED);
+  MotorPID* m1MotorPID = new RampedMotorPID(MAX_SPEED_INCREMENT_ALLOWED);
+  
+  // Create the motor controller
+  motorController = new MotorController(motorManager, m0MotorPID, m1MotorPID, 50, RADIANS_PER_TICK, MAX_RADIANS_PER_SECOND);
+
   DebugMsgs.debug().print("RADIANS_PER_TICK: ").println(RADIANS_PER_TICK);
   DebugMsgs.debug().print("MAX_RADIANS_PER_SECOND: ").println(MAX_RADIANS_PER_SECOND);
   DebugMsgs.debug().print("MAX_LINEAR_VELOCITY_ALLOWED: ").println(MAX_LINEAR_VELOCITY_ALLOWED);
   DebugMsgs.debug().print("MAX_ANGULAR_VELOCITY_ALLOWED: ").println(MAX_ANGULAR_VELOCITY_ALLOWED);
-
-  // Create the motor controller
-  motorController = new MotorController(motorManager, KP, KI, KD, 50, RADIANS_PER_TICK, MAX_RADIANS_PER_SECOND);
-
-  // Set the RC pins into the setSpeedFromRCTask
+  DebugMsgs.debug().print("MAX_SPEED_INCREMENT_ALLOWED: ").println(MAX_SPEED_INCREMENT_ALLOWED);
+  
+  // Set the RC pins into the readFromRCTask
   readFromRCTask.setRCPins(RC_CH1_PIN, RC_CH2_PIN);
 
   // Set the needed references into the adjustSpeedsTask
   adjustSpeedsTask.setMotorManagerAndController(motorManager, motorController);
   adjustSpeedsTask.setReadFromRCTask(&readFromRCTask);
-  adjustSpeedsTask.useMotorController(false);
 
   // Set the serial port to be monitored
   checkForOTATask.setSerial(&Serial5);

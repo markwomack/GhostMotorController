@@ -17,7 +17,6 @@ class AdjustSpeedsTask : public Task {
   public:
     AdjustSpeedsTask();
     
-    void useMotorController(bool useMotorController);
     void setMotorManagerAndController(MotorAndEncoderManager* motorManager, MotorController* motorController);
     void setReadFromRCTask(ReadFromRCTask* readFromRCTask);
     void start(void);
@@ -32,13 +31,10 @@ class AdjustSpeedsTask : public Task {
     void update(void);
 
   private:
-    bool _useMotorController;
     bool _stopped;
     MotorAndEncoderManager* _motorManager;
     MotorController* _motorController;
     ReadFromRCTask* _readFromRCTask;
-    double _targetM0Speed;
-    double _targetM1Speed;
     double _linearVelocity;
     double _angularVelocity;
 };
