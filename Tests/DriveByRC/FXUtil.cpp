@@ -58,20 +58,18 @@ void update_firmware( Stream *in, Stream *out,
     read_ascii_line( in, line, sizeof(line) );
     // reliability of transfer via USB is improved by this printf/flush
     if (in == out && out == (Stream*)&Serial) {
-      //out->printf( "%s\n", line );
-      //out->flush();
-      DebugMsgs.debug().println(line);
-      DebugMsgs.flush();
+      out->printf( "%s\n", line );
+      out->flush();
     }
 
     if (parse_hex_line( (const char*)line, hex.data, &hex.addr, &hex.num, &hex.code ) == 0) {
       //out->printf( "abort - bad hex line %s\n", line );
-      DebugMsgs.debug().print("abort - bad hex line '").print(line).println("'");;
+      DebugMsgs.debug().printfln( "abort - bad hex line '%s'", line );
       DebugMsgs.flush();
     }
     else if (process_hex_record( &hex ) != 0) { // error on bad hex code
       //out->printf( "abort - invalid hex code %d\n", hex.code );
-      DebugMsgs.debug().print("abort - invalid hex code ").println(hex.code);
+      DebugMsgs.debug().printfln( "abort - invalid hex code %d", hex.code );
       DebugMsgs.flush();
       return;
     }
@@ -79,7 +77,7 @@ void update_firmware( Stream *in, Stream *out,
       uint32_t addr = buffer_addr + hex.base + hex.addr - FLASH_BASE_ADDR;
       if (hex.max > (FLASH_BASE_ADDR + buffer_size)) {
         //out->printf( "abort - max address %08lX too large\n", hex.max );
-        DebugMsgs.debug().print("abort - max address too large 0x").println(hex.max, HEX);
+        DebugMsgs.debug().printfln( "abort - max address %08lX too large", hex.max );
         DebugMsgs.flush();
         return;
       }
@@ -90,7 +88,7 @@ void update_firmware( Stream *in, Stream *out,
         int error = flash_write_block( addr, hex.data, hex.num );
         if (error) {
           //out->printf( "abort - error %02X in flash_write_block()\n", error );
-          DebugMsgs.debug().print("abort - error in flash_write_block() ").println(error);
+          DebugMsgs.debug().printfln( "abort - error %02X in flash_write_block()", error );
           DebugMsgs.flush();
 	        return;
         }
@@ -99,13 +97,10 @@ void update_firmware( Stream *in, Stream *out,
     hex.lines++;
   }
 
-  out->printf( "\nhex file: %1d lines %1lu bytes (%08lX - %08lX)\n",
-			hex.lines, hex.max-hex.min, hex.min, hex.max );
-  DebugMsgs.debug().println().print("hex file: ")
-    .print(hex.lines).print(" lines ")
-    .print(hex.max-hex.min).print(" bytes (0x")
-    .print(hex.min, HEX).print(" - 0x")
-    .print(hex.max, HEX).println(")");
+  //out->printf( "\nhex file: %1d lines %1lu bytes (%08lX - %08lX)\n",
+	//		hex.lines, hex.max-hex.min, hex.min, hex.max );
+  DebugMsgs.debug().printfln( "\nhex file: %1d lines %1lu bytes (%08lX - %08lX)",
+     hex.lines, hex.max-hex.min, hex.min, hex.max );
   DebugMsgs.flush();
 
   // check FSEC value in new code -- abort if incorrect
@@ -113,12 +108,12 @@ void update_firmware( Stream *in, Stream *out,
   uint32_t value = *(uint32_t *)(0x40C + buffer_addr);
   if (value == 0xfffff9de) {
     //out->printf( "new code contains correct FSEC value %08lX\n", value );
-    DebugMsgs.debug().print("new code contains correct FSEC value: 0x").println(value, HEX);
+    DebugMsgs.debug().printfln( "new code contains correct FSEC value %08lX", value );
     DebugMsgs.flush();
   }
   else {
     //out->printf( "abort - FSEC value %08lX should be FFFFF9DE\n", value );
-    DebugMsgs.debug().print("abort - FSEC value should be FFFFF9DE: ").println(value, HEX);
+    DebugMsgs.debug().printfln( "abort - FSEC value %08lX should be FFFFF9DE", value );
     DebugMsgs.flush();
     return;
   } 
@@ -127,12 +122,12 @@ void update_firmware( Stream *in, Stream *out,
   // check FLASH_ID in new code - abort if not found
   if (check_flash_id( buffer_addr, hex.max - hex.min )) {
     //out->printf( "new code contains correct target ID %s\n", FLASH_ID );
-    DebugMsgs.debug().print("new code contains correct target ID: ").println(FLASH_ID);
+    DebugMsgs.debug().printfln( "new code contains correct target ID %s", FLASH_ID );
     DebugMsgs.flush();
   }
   else {
     //out->printf( "abort - new code missing string %s\n", FLASH_ID );
-    DebugMsgs.debug().print("abort - new code missing string: ").println(FLASH_ID);
+    DebugMsgs.debug().printfln( "abort - new code missing string %s", FLASH_ID );
     DebugMsgs.flush();
     return;
   }

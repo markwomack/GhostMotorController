@@ -55,4 +55,5 @@ const double MAX_LINEAR_VELOCITY_ALLOWED(0.10 * MAX_RADIANS_PER_SECOND);  // 10%
 // Maximum velocity allowed for angular velocity (left/right)
 const double MAX_ANGULAR_VELOCITY_ALLOWED(0.05 * MAX_RADIANS_PER_SECOND); // 5% of maximum speed
 
+const double MAX_SPEED_INCREMENT_ALLOWED(0.01 * MAX_RADIANS_PER_SECOND); // 1% of maximum speed
 #endif // GLOBALS_H
