@@ -29,9 +29,7 @@ class TCPToSerialTask : public Task {
     
     void update(void) {
       WiFiClient tcpClient = _tcpServer->available();
-
-      // If a client was returned, store it for future use
-      // and indicate an OTA is now available
+      
       if (tcpClient) {
         DebugMsgs.debug().println("New tcp data available");
         uint32_t totalSize = 0;
@@ -41,7 +39,7 @@ class TCPToSerialTask : public Task {
           size = tcpClient.readBytes(buffer, 512);
           totalSize += _serial->write(buffer, size);
         }
-        DebugMsgs.debug().print("All data sent: ").println(totalSize);
+        DebugMsgs.debug().printfln("All data sent: %d", totalSize);
         tcpClient.stop();
       }
     }

@@ -18,6 +18,7 @@ class MyNetworkHub {
 
     UDP* getUdpPort(uint32_t portNum);
     WiFiServer* getTCPServer(uint32_t portNum);
+    
     void printWifiStatus(void);
 };
 

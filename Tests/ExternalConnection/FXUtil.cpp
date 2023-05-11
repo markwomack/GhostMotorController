@@ -3,7 +3,7 @@
 //******************************************************************************
 #include <Arduino.h>
 #include <DebugMsgs.h>
-
+#include "CRCStream.h"
 extern "C" {
   #include "FlashTxx.h"		// TLC/T3x/T4x/TMM flash primitives
 }
@@ -29,7 +29,7 @@ typedef struct {	//
 //******************************************************************************
 // hex_info_t	struct for hex record and hex file info
 //******************************************************************************
-void read_ascii_line( Stream *serial, char *line, int maxbytes );
+void read_ascii_line( Stream *serial, char *line, int maxbytes, bool* streamHasCRLF );
 int  parse_hex_line( const char *theline, char *bytes,
 	unsigned int *addr, unsigned int *num, unsigned int *code );
 int  process_hex_record( hex_info_t *hex );
@@ -39,8 +39,7 @@ void update_firmware( Stream *in, Stream *out,
 //******************************************************************************
 // update_firmware()	read hex file and write new firmware to program flash
 //******************************************************************************
-void update_firmware( Stream *in, Stream *out, 
-				uint32_t buffer_addr, uint32_t buffer_size )
+void update_firmware( CRCStream *in, Stream *out, uint32_t buffer_addr, uint32_t buffer_size )
 {
   static char line[96];					// buffer for hex lines
   static char data[32] __attribute__ ((aligned (8)));	// buffer for hex data
@@ -50,37 +49,31 @@ void update_firmware( Stream *in, Stream *out,
     0, 0						//   eof,lines
   };
 
-  out->printf( "reading hex lines...\n" );
+  DebugMsgs.debug().println( "reading hex lines..." );
 
+  bool streamHasCRLF = false;
+  
   // read and process intel hex lines until EOF or error
   while (!hex.eof)  {
 
-    read_ascii_line( in, line, sizeof(line) );
+    read_ascii_line( in, line, sizeof(line), &streamHasCRLF);
     // reliability of transfer via USB is improved by this printf/flush
-    if (in == out && out == (Stream*)&Serial) {
-      //out->printf( "%s\n", line );
-      //out->flush();
-      DebugMsgs.debug().println(line);
-      DebugMsgs.flush();
+    if (in == (Stream*)&Serial) {
+      Serial.printf( "%s\n", line );
+      Serial.flush();
     }
 
     if (parse_hex_line( (const char*)line, hex.data, &hex.addr, &hex.num, &hex.code ) == 0) {
-      //out->printf( "abort - bad hex line %s\n", line );
-      DebugMsgs.debug().print("abort - bad hex line ").println(line);
-      DebugMsgs.flush();
+      DebugMsgs.debug().printfln( "abort - bad hex line %s", line );
     }
     else if (process_hex_record( &hex ) != 0) { // error on bad hex code
-      //out->printf( "abort - invalid hex code %d\n", hex.code );
-      DebugMsgs.debug().print("abort - invalid hex code ").println(hex.code);
-      DebugMsgs.flush();
+      DebugMsgs.debug().printfln( "abort - invalid hex code %d", hex.code );
       return;
     }
     else if (hex.code == 0) { // if data record
       uint32_t addr = buffer_addr + hex.base + hex.addr - FLASH_BASE_ADDR;
       if (hex.max > (FLASH_BASE_ADDR + buffer_size)) {
-        //out->printf( "abort - max address %08lX too large\n", hex.max );
-        DebugMsgs.debug().print("abort - max address too large ").println(hex.max);
-        DebugMsgs.flush();
+        DebugMsgs.debug().printfln( "abort - max address %08lX too large", hex.max );
         return;
       }
       else if (!IN_FLASH(buffer_addr)) {
@@ -89,51 +82,43 @@ void update_firmware( Stream *in, Stream *out,
       else if (IN_FLASH(buffer_addr)) {
         int error = flash_write_block( addr, hex.data, hex.num );
         if (error) {
-          //out->printf( "abort - error %02X in flash_write_block()\n", error );
-          DebugMsgs.debug().print("abort - error in flash_write_block() ").println(error);
-          DebugMsgs.flush();
+          DebugMsgs.debug().printfln( "abort - error %02X in flash_write_block()", error );
 	        return;
         }
       }
     }
     hex.lines++;
   }
+  
+  if (!in->sizeAndCRCMatch()) {
+    DebugMsgs.debug().println( "abort - data size or CRC does not match expected" );
+    DebugMsgs.debug().printfln( "Expected size: %d, actual: %d", in->getExpectedSize(), in->getCurrentSize());
+    DebugMsgs.debug().printfln( "Expected CRC: %x, actual: %x", in->getExpectedCRC(), in->getCurrentCRC());
+    return;
+  }
 
-  out->printf( "\nhex file: %1d lines %1lu bytes (%08lX - %08lX)\n",
+  DebugMsgs.debug().printfln( "\ndata size: %d, data CRC: %x", in->getCurrentSize(), in->getCurrentCRC());
+  DebugMsgs.debug().printfln( "hex file: %1d lines %1lu bytes (%08lX - %08lX)",
 			hex.lines, hex.max-hex.min, hex.min, hex.max );
-  DebugMsgs.debug().println().print("hex file: ")
-    .print(hex.lines).print(" lines ")
-    .print(hex.max-hex.min).print(" bytes (")
-    .print(hex.min).print(" - ")
-    .print(hex.max).println(")");
-  DebugMsgs.flush();
 
   // check FSEC value in new code -- abort if incorrect
   #if defined(KINETISK) || defined(KINETISL)
   uint32_t value = *(uint32_t *)(0x40C + buffer_addr);
   if (value == 0xfffff9de) {
-    //out->printf( "new code contains correct FSEC value %08lX\n", value );
-    DebugMsgs.debug().print("new code contains correct FSEC value: ").println(value);
-    DebugMsgs.flush();
+    DebugMsgs.debug().printfln( "new code contains correct FSEC value %08lX", value );
   }
   else {
-    //out->printf( "abort - FSEC value %08lX should be FFFFF9DE\n", value );
-    DebugMsgs.debug().print("abort - FSEC value should be FFFFF9DE: ").println(value);
-    DebugMsgs.flush();
+    DebugMsgs.debug().printfln( "abort - FSEC value %08lX should be FFFFF9DE", value );
     return;
   } 
   #endif
 
   // check FLASH_ID in new code - abort if not found
   if (check_flash_id( buffer_addr, hex.max - hex.min )) {
-    //out->printf( "new code contains correct target ID %s\n", FLASH_ID );
-    DebugMsgs.debug().print("new code contains correct target ID: ").println(FLASH_ID);
-    DebugMsgs.flush();
+    DebugMsgs.debug().printfln( "new code contains correct target ID %s", FLASH_ID );
   }
   else {
-    //out->printf( "abort - new code missing string %s\n", FLASH_ID );
-    DebugMsgs.debug().print("abort - new code missing string: ").println(FLASH_ID);
-    DebugMsgs.flush();
+    DebugMsgs.debug().printfln( "abort - new code missing string %s", FLASH_ID );
     return;
   }
 
@@ -151,10 +136,9 @@ void update_firmware( Stream *in, Stream *out,
 //    return;
 //  }
 //  else {
-    //out->printf( "calling flash_move() to load new firmware...\n" );
-    //out->flush();
-    DebugMsgs.debug().println("calling flash_move() to load new firmware...");
+    DebugMsgs.debug().println( "calling flash_move() to load new firmware in 5 seconds...\n" );
     DebugMsgs.flush();
+    delay(5000);
 //  }
   
   // move new program from buffer to flash, free buffer, and reboot
@@ -167,13 +151,15 @@ void update_firmware( Stream *in, Stream *out,
 //******************************************************************************
 // read_ascii_line()	read ascii characters until '\n', '\r', or max bytes
 //******************************************************************************
-void read_ascii_line( Stream *serial, char *line, int maxbytes )
+void read_ascii_line( Stream *serial, char *line, int maxbytes, bool* streamHasCRLF )
 {
   int c=0, nchar=0;
   while (serial->available()) {
     c = serial->read();
-    if (c == '\n' || c == '\r')
+    if (c == '\n' || c == '\r') {
+      *streamHasCRLF = true;
       continue;
+    }
     else {
       line[nchar++] = c;
       break;
@@ -186,6 +172,11 @@ void read_ascii_line( Stream *serial, char *line, int maxbytes )
     }
   }
   line[nchar-1] = 0;	// null-terminate
+
+  // drop the extra cr/lf now
+  if (*streamHasCRLF && serial->available()) {
+    serial->read();
+  }
 }
 
 //******************************************************************************

@@ -46,6 +46,7 @@ class RemoteSerialReaderTask : public Task {
           return;
         } else if (nextByte == '\n') {
           xferPrinter.println();
+          xferPrinter.flush();
         } else {
           xferPrinter.print((char)nextByte);
         }
@@ -136,5 +137,8 @@ void loop() {
 
     // perform the OTA update
     checkForLocalOTATask.performUpdate();
+
+    // update aborted, so restart task manager
+    taskManager.start();
   }
 }
