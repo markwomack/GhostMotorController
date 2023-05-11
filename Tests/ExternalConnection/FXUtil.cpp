@@ -97,7 +97,7 @@ void update_firmware( CRCStream *in, Stream *out, uint32_t buffer_addr, uint32_t
     return;
   }
 
-  DebugMsgs.debug().printfln( "\ndata size: %d, data CRC: %x", in->getCurrentSize(), in->getCurrentCRC());
+  DebugMsgs.debug().printfln( "data size: %d, data CRC: %x", in->getCurrentSize(), in->getCurrentCRC());
   DebugMsgs.debug().printfln( "hex file: %1d lines %1lu bytes (%08lX - %08lX)",
 			hex.lines, hex.max-hex.min, hex.min, hex.max );
 

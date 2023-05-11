@@ -83,9 +83,7 @@ class CheckForOTATask : public Task {
       REBOOT;
     };
 
-    CRCStream* getCRCStream(WiFiClient* tcpClient) {
-      DebugMsgs.debug().println("Reading expected size and CRC");
-    
+    CRCStream* getCRCStream(WiFiClient* tcpClient) {    
       uint32_t expectedSize = 0;
       uint32_t expectedCRC = 0;
       
@@ -126,7 +124,7 @@ class CheckForOTATask : public Task {
         return 0;
       }
     
-      DebugMsgs.debug().printfln("Expected size: %d, expected CRC: %x", expectedSize, expectedCRC);
+      DebugMsgs.debug().printfln("Expected update size: %d, expected update CRC: %x", expectedSize, expectedCRC);
       
       return new CRCStream(tcpClient, expectedSize, expectedCRC);
     };
