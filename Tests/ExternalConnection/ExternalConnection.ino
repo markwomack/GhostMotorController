@@ -33,7 +33,7 @@ class RemoteSerialReaderTask : public Task {
 
     void update(void) {
       if (_srcSerial->available()) {
-        uint32_t size = _srcSerial->readBytesUntil('\r', buffer, 255);
+        uint32_t size = _srcSerial->readBytesUntil('\r', buffer, 1023);
         if (size == 0) {
           return;
         }
@@ -55,10 +55,10 @@ class RemoteSerialReaderTask : public Task {
 
   private:
     HardwareSerial* _srcSerial;
-    char buffer[256];
+    char buffer[1024];
 };
 
-#define SERIAL_BUFFER_SIZE 4096
+#define SERIAL_BUFFER_SIZE 8192
 uint8_t incomingBuffer[SERIAL_BUFFER_SIZE];
 uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 

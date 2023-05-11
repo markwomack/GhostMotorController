@@ -15,10 +15,10 @@
 // [<------------------------------ FLASH_SIZE ------------------------------->]
 // ^FLASH_BASE_ADDR
 
-#include <Arduino.h>    // Serial, etc. (if used)
-#include <malloc.h>   // malloc(), free()
-#include <string.h>   // memset()
-#include "FlashTxx.h"   // FLASH_BASE_ADDRESS, FLASH_SECTOR_SIZE, etc.
+#include <Arduino.h>		// Serial, etc. (if used)
+#include <malloc.h>		// malloc(), free()
+#include <string.h>		// memset()
+#include "FlashTxx.h"		// FLASH_BASE_ADDRESS, FLASH_SECTOR_SIZE, etc.
 
 static int leave_interrupts_disabled = 0;
 
@@ -86,27 +86,27 @@ int check_flash_id( uint32_t buffer, uint32_t size )
 
 #define FLASH_ALIGN(address,align) (address &= ~(align-1))
 
-#define FCMD_READ_1S_SECTION    (0x01)
-#define FCMD_PROGRAM_CHECK    (0x02)
-#define FCMD_PROGRAM_LONG_WORD    (0x06)
-#define FCMD_PROGRAM_PHRASE   (0x07)
-#define FCMD_ERASE_FLASH_SECTOR   (0x09)
-#define FCMD_READ_ONCE      (0x41)
-#define FCMD_PROGRAM_ONCE   (0x43)
+#define FCMD_READ_1S_SECTION		(0x01)
+#define FCMD_PROGRAM_CHECK		(0x02)
+#define FCMD_PROGRAM_LONG_WORD		(0x06)
+#define FCMD_PROGRAM_PHRASE		(0x07)
+#define FCMD_ERASE_FLASH_SECTOR		(0x09)
+#define FCMD_READ_ONCE			(0x41)
+#define FCMD_PROGRAM_ONCE		(0x43)
 
-#define FTFL_READ_MARGIN_NORMAL   (0x00)
-#define FTFL_READ_MARGIN_USER   (0x01)
-#define FTFL_READ_MARGIN_FACTORY  (0x02)
+#define FTFL_READ_MARGIN_NORMAL		(0x00)
+#define FTFL_READ_MARGIN_USER		(0x01)
+#define FTFL_READ_MARGIN_FACTORY	(0x02)
 
 RAMFUNC static void flash_exec( void ) 
 {
-  __disable_irq();        // disable interrupts
-  kinetis_hsrun_disable();      // disable high-speed run
-  FTFL_FSTAT = FTFL_FSTAT_CCIF;     // execute!
-  while (!(FTFL_FSTAT & FTFL_FSTAT_CCIF)) {;} // wait for done
-  kinetis_hsrun_enable();     // re-enable high-speed run
-  if (!leave_interrupts_disabled)   // if OK to enable interrupts
-    __enable_irq();       //   re-enable interrupts
+  __disable_irq();				// disable interrupts
+  kinetis_hsrun_disable();			// disable high-speed run
+  FTFL_FSTAT = FTFL_FSTAT_CCIF;			// execute!
+  while (!(FTFL_FSTAT & FTFL_FSTAT_CCIF)) {;}	// wait for done
+  kinetis_hsrun_enable();			// re-enable high-speed run
+  if (!leave_interrupts_disabled)		// if OK to enable interrupts
+    __enable_irq();				//   re-enable interrupts
 }
 
 RAMFUNC static void flash_init_command( uint8_t command, uint32_t address )
@@ -123,7 +123,7 @@ RAMFUNC static void flash_init_command( uint8_t command, uint32_t address )
 #if (FLASH_WRITE_SIZE==4) // TLC, T30, T31, T32
 
 //******************************************************************************
-// flash_word()   write 4-byte word to flash - must run from ram
+// flash_word()		write 4-byte word to flash - must run from ram
 //******************************************************************************
 // aFSEC = allow FSEC sector      (set aFSEC = true to write in FSEC sector)
 // oFSEC = overwrite FSEC value   (set BOTH  = true to write to FSEC address)
@@ -153,7 +153,7 @@ RAMFUNC int flash_word( uint32_t address, uint32_t value, int aFSEC, int oFSEC )
 #elif (FLASH_WRITE_SIZE==8) // T35, T36
 
 //******************************************************************************
-// flash_phrase() write 8-byte phrase to flash - must run from ram
+// flash_phrase()	write 8-byte phrase to flash - must run from ram
 //******************************************************************************
 // aFSEC = allow FSEC sector      (set aFSEC = true to write in FSEC sector)
 // oFSEC = overwrite FSEC value   (set BOTH  = true to write to FSEC address)
@@ -188,7 +188,7 @@ RAMFUNC int flash_phrase( uint32_t address, uint64_t value, int aFSEC, int oFSEC
 #endif // FLASH_WRITE_SIZE
 
 //******************************************************************************
-// flash_erase_sector()   erase sector at address - must run from RAM
+// flash_erase_sector()		erase sector at address - must run from RAM
 //******************************************************************************
 // aFSEC = allow FSEC sector      (set aFSEC = true to write in FSEC sector)
 RAMFUNC int flash_erase_sector( uint32_t address, int aFSEC )
@@ -207,7 +207,7 @@ RAMFUNC int flash_erase_sector( uint32_t address, int aFSEC )
 }
 
 //******************************************************************************
-// flash_sector_not_erased()  returns 0 if erased and !0 (error) if NOT erased
+// flash_sector_not_erased()	returns 0 if erased and !0 (error) if NOT erased
 //******************************************************************************
 RAMFUNC int flash_sector_not_erased( uint32_t address )
 {
@@ -227,7 +227,7 @@ RAMFUNC int flash_sector_not_erased( uint32_t address )
 #elif defined(__IMXRT1062__) // T4.x
 
 //******************************************************************************
-// flash_sector_not_erased()  returns 0 if erased and !0 (error) if NOT erased
+// flash_sector_not_erased()	returns 0 if erased and !0 (error) if NOT erased
 //******************************************************************************
 RAMFUNC int flash_sector_not_erased( uint32_t address )
 {
@@ -306,7 +306,7 @@ RAMFUNC void flash_move( uint32_t dst, uint32_t src, uint32_t size )
           #else
             error |= flash_erase_sector( addr, 0 );
           #endif
-  }
+	}
       }
       offset += FLASH_WRITE_SIZE;
     }   
@@ -320,7 +320,7 @@ RAMFUNC void flash_move( uint32_t dst, uint32_t src, uint32_t size )
 }
 
 //******************************************************************************
-// flash_erase_block()  erase sectors from (start) to (start + size)
+// flash_erase_block()	erase sectors from (start) to (start + size)
 //******************************************************************************
 int flash_erase_block( uint32_t start, uint32_t size )
 {
@@ -329,11 +329,11 @@ int flash_erase_block( uint32_t start, uint32_t size )
   while (address < (start + size) && error == 0) { 
     if ((address & (FLASH_SECTOR_SIZE - 1)) == 0) {
       if (flash_sector_not_erased( address )) {
-  #if defined(__IMXRT1062__)
+	#if defined(__IMXRT1062__)
           eepromemu_flash_erase_sector( (void*)address );
         #elif defined(KINETISK) || defined(KINETISL)
           error = flash_erase_sector( address, 0 );
-  #endif
+	#endif
       }
     }
     address += FLASH_SECTOR_SIZE;
@@ -347,46 +347,46 @@ int flash_erase_block( uint32_t start, uint32_t size )
 int flash_write_block( uint32_t addr, char *data, uint32_t count )
 {
   // static (aligned) variables to guarantee 32-bit or 64-bit-aligned writes
-  #if (FLASH_WRITE_SIZE == 4)       // #if 4-byte writes
-  static uint32_t buf __attribute__ ((aligned (4)));  //   4-byte buffer
-  #elif (FLASH_WRITE_SIZE == 8)       // #elif 8-byte writes
-  static uint64_t buf __attribute__ ((aligned (8)));  //   8-byte buffer
-  #endif            //
-  static uint32_t buf_count = 0;      // bytes in buffer
-  static uint32_t next_addr = 0;      // expected address
+  #if (FLASH_WRITE_SIZE == 4)				// #if 4-byte writes
+  static uint32_t buf __attribute__ ((aligned (4)));	//   4-byte buffer
+  #elif (FLASH_WRITE_SIZE == 8)				// #elif 8-byte writes
+  static uint64_t buf __attribute__ ((aligned (8)));	//   8-byte buffer
+  #endif						//
+  static uint32_t buf_count = 0;			// bytes in buffer
+  static uint32_t next_addr = 0;			// expected address
   
-  int ret = 0;            // return value
-  uint32_t data_i = 0;          // index to data array
+  int ret = 0;						// return value
+  uint32_t data_i = 0;					// index to data array
 
-  if ((addr % 4) != 0 || (count % 4) != 0) {    // if not 32-bit aligned
-    return 1; // "flash_block align error\n"    //   return error code 1
+  if ((addr % 4) != 0 || (count % 4) != 0) {		// if not 32-bit aligned
+    return 1;	// "flash_block align error\n"		//   return error code 1
   }
 
-  if (buf_count > 0 && addr != next_addr) {   // if unexpected address   
-    return 2; // "unexpected address\n"   //   return error code 2   
+  if (buf_count > 0 && addr != next_addr) {		// if unexpected address   
+    return 2;	// "unexpected address\n"		//   return error code 2   
   }
-  next_addr = addr + count;       //   compute next address
-  addr -= buf_count;          //   address of data[0]
+  next_addr = addr + count;				//   compute next address
+  addr -= buf_count;					//   address of data[0]
 
-  while (data_i < count) {        // while more data
-    ((char*)&buf)[buf_count++] = data[data_i++];  //   copy a byte to buf
-    if (buf_count < FLASH_WRITE_SIZE) {     //   if buf not complete
-      continue;           //     continue while()
-    }             //   
-    #if defined(__IMXRT1062__)        //   #if T4.x 4-byte
-      eepromemu_flash_write((void*)addr,(void*)&buf,4); //     flash_write()
-    #elif (FLASH_WRITE_SIZE==4)       //   #elif T3.x 4-byte 
-      ret = flash_word( addr, buf, 0, 0 );    //     flash_word()
-    #elif (FLASH_WRITE_SIZE==8)       //   #elif T3.x 8-byte
-      ret = flash_phrase( addr, buf, 0, 0 );    //     flash_phrase()
+  while (data_i < count) {				// while more data
+    ((char*)&buf)[buf_count++] = data[data_i++];	//   copy a byte to buf
+    if (buf_count < FLASH_WRITE_SIZE) {			//   if buf not complete
+      continue;						//     continue while()
+    }							//   
+    #if defined(__IMXRT1062__)				//   #if T4.x 4-byte
+      eepromemu_flash_write((void*)addr,(void*)&buf,4);	//     flash_write()
+    #elif (FLASH_WRITE_SIZE==4)				//   #elif T3.x 4-byte 
+      ret = flash_word( addr, buf, 0, 0 );		//     flash_word()
+    #elif (FLASH_WRITE_SIZE==8)				//   #elif T3.x 8-byte
+      ret = flash_phrase( addr, buf, 0, 0 );		//     flash_phrase()
     #endif
-    if (ret != 0) {         //   if write error
-      return 3; // "flash write error %d\n"   //     error code
+    if (ret != 0) {					//   if write error
+      return 3;	// "flash write error %d\n"		//     error code
     }
-    buf_count = 0;          //   re-init buf count
-    addr += FLASH_WRITE_SIZE;       //   advance address
+    buf_count = 0;					//   re-init buf count
+    addr += FLASH_WRITE_SIZE;				//   advance address
   }  
-  return 0;           // return success
+  return 0;						// return success
 }
 
 #if defined(__MK66FX1M0__) // T3.6 only
@@ -474,3 +474,4 @@ void LMEM_CodeCacheClearAll(void)
 }
 
 #endif
+

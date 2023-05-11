@@ -32,7 +32,7 @@ MotorAndEncoderManager* motorManager;
 // Motor Controller
 MotorController* motorController;
 
-#define SERIAL_BUFFER_SIZE 4096
+#define SERIAL_BUFFER_SIZE 8192
 uint8_t incomingBuffer[SERIAL_BUFFER_SIZE];
 uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
@@ -128,5 +128,8 @@ void loop() {
 
     // perform the OTA update
     checkForOTATask.performUpdate();
+
+    // update aborted, restart task manager
+    taskManager.start();
   }
 }
