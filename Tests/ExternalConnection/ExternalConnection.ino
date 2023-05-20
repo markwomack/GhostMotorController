@@ -13,15 +13,17 @@
 #include <CascadePrinter.h>
 #include <UDPPrintWrapper.h>
 #include <TaskManager.h> // https://github.com/markwomack/TaskManager
+#include <WiFiNetworkHub.h>
+#include <CheckForTCPUpdateTask.h>
+#include <FlasherXUpdater.h>
 
 // Local includes
 #include "pin_assignments.h"
 #include "constants.h"
-#include "MyNetworkHub.h"
-#include "CheckForOTATask.h"
+#include "secrets.h"
 #include "TCPToSerialTask.h"
 
-MyNetworkHub networkHub;
+WiFiNetworkHub networkHub;
 
 CascadePrinter xferPrinter;
 
@@ -63,7 +65,7 @@ uint8_t incomingBuffer[SERIAL_BUFFER_SIZE];
 uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
 TCPToSerialTask tcpToSerialTask;
-CheckForOTATask checkForLocalOTATask;
+CheckForTCPUpdateTask checkForTCPUpdateTask;
 RemoteSerialReaderTask remoteSerialReaderTask;
 
 void setup() {
@@ -78,31 +80,31 @@ void setup() {
   pinMode(LED_STATUS_PIN, OUTPUT);
 
   // Connect to WiFi network, create a TCP port to monitor
-  if (networkHub.start() == 0) {
+  networkHub.setPins(WIFI_SPI_MOSI0_PIN, WIFI_SPI_MISO0_PIN, WIFI_SPI_SCK0_PIN, WIFI_SPI_CS0_PIN, WIFI_RESET_PIN, WIFI_BUSY_PIN);
+  networkHub.setHostIPAddress(HOST_IP_ADDRESS);
+  if (networkHub.start(SECRET_SSID, SECRET_PASS, DebugMsgs.getPrint())) {
     
     DebugMsgs.print("Switching to UDP for debug messages: ").print(TARGET_IP_ADDRESS).print(":").println(UDP_TARGET_PORT1);
     UDPPrintWrapper* udpPrint =
         new UDPPrintWrapper(networkHub.getUdpPort(DEBUG_UDP_PORT1), TARGET_IP_ADDRESS, UDP_TARGET_PORT1);
       
-    DebugMsgs.setPrint(udpPrint);
+    DebugMsgs.setPrintWrapper(udpPrint);
     DebugMsgs.println("Starting debug messages through remote udp");
 
     // set up the remote xfer printer
     UDPPrintWrapper* xferUdpPrint =
         new UDPPrintWrapper(networkHub.getUdpPort(DEBUG_UDP_PORT2), TARGET_IP_ADDRESS, UDP_TARGET_PORT2);
-    xferPrinter.setPrint(xferUdpPrint);
+    xferPrinter.setPrintWrapper(xferUdpPrint);
         
-    WiFiServer* tcpServer1 = networkHub.getTCPServer(TCP_SERVER_PORT_1);
-    tcpToSerialTask.setTCPServer(tcpServer1);
+    tcpToSerialTask.setTCPServer(networkHub.getTCPServer(TCP_SERVER_PORT_1));
 
-    WiFiServer* tcpServer2 = networkHub.getTCPServer(TCP_SERVER_PORT_2);
-    checkForLocalOTATask.setTCPServer(tcpServer2);
+    checkForTCPUpdateTask.setTCPServer(networkHub.getTCPServer(TCP_SERVER_PORT_2));
   } else {
     DebugMsgs.debug().println("Unable to connect to WiFi!");
     while (true) {;}
   }
 
-  networkHub.printWifiStatus();
+  networkHub.printWiFiStatus(DebugMsgs.getPrint());
 
   tcpToSerialTask.setSerial(&Serial5);
   
@@ -112,7 +114,7 @@ void setup() {
   taskManager.addTask(&tcpToSerialTask, 1000);
 
   // This task will check the TCP port for a local OTA every half second
-  taskManager.addTask(&checkForLocalOTATask, 500);
+  taskManager.addTask(&checkForTCPUpdateTask, 500);
 
   // This task will read from the 'remote' serial and xfer to udp
   taskManager.addTask(&remoteSerialReaderTask, 5);
@@ -129,16 +131,16 @@ void loop() {
   taskManager.update();
 
   // If there is an OTA, stop everything and process
-  if (checkForLocalOTATask.otaIsAvailable()) {
+  if (checkForTCPUpdateTask.updateIsAvailable()) {
     DebugMsgs.debug().println("OTA update available, processing...");
 
     // stop normal operation
     taskManager.stop();
 
     // perform the OTA update
-    checkForLocalOTATask.performUpdate();
+    FlasherXUpdater::performUpdate(checkForTCPUpdateTask.getTCPClient());
 
-    // update aborted, so restart task manager
+    // update aborted before restart requires, so restart task manager
     taskManager.start();
   }
 }

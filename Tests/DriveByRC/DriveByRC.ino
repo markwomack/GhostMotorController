@@ -51,7 +51,7 @@ void setup() {
   DebugMsgs.enableLevel(DEBUG);
 
   // All output now goes to Serial5
-  DebugMsgs.setPrint(new FlushingPrintWrapper(new PrintWrapper(&Serial5)));
+  DebugMsgs.setPrintWrapper(new FlushingPrintWrapper(new PrintWrapper(&Serial5)));
 
   DebugMsgs.debug().println("Starting Drive By RC");
   
