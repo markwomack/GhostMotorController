@@ -60,7 +60,7 @@ class RemoteSerialReaderTask : public Task {
     char buffer[1024];
 };
 
-#define SERIAL_BUFFER_SIZE 8192
+#define SERIAL_BUFFER_SIZE 16384
 uint8_t incomingBuffer[SERIAL_BUFFER_SIZE];
 uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
