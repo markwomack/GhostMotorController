@@ -1,52 +1,67 @@
+//
+// Licensed under the MIT license.
+// See accompanying LICENSE file for details.
+//
 
-#ifndef TCPTOSERIAL_H
-#define TCPTOSERIAL_H
+#ifndef TCPTOSERIALTASK_H
+#define TCPTOSERIALTASK_H
 
-#include <Arduino.h>
-
+#include <DebugMsgs.h>
 #include <WiFiServer.h>
 #include <WiFiClient.h>
-
 #include <Task.h>
 
-// This is a task that checks a TCP port for avialable
-// data, and then pushes the data to its serial port.
 class TCPToSerialTask : public Task {
   public:
+    TCPToSerialTask() {
+      _hasTCPClient = false;
+    };
+    
     void setTCPServer(WiFiServer* tcpServer) {
       _tcpServer = tcpServer;
+    };
+
+    void setSerial(HardwareSerial* hardwareSerial) {
+      _serialStream = (Stream*)hardwareSerial;
     }
 
-    void setSerial(HardwareSerial* serial) {
-      _serial = serial;
-    }
-    
-    void start(void) { 
-      if (_tcpServer == 0) {
-        DebugMsgs.debug().println("TCP Server not specified!");
-      }
-    }
+    void start(void) {
+      _hasTCPClient = false;
+    };
     
     void update(void) {
-      WiFiClient tcpClient = _tcpServer->available();
-      
-      if (tcpClient) {
-        DebugMsgs.debug().println("New tcp data available");
-        uint32_t totalSize = 0;
-        uint32_t size;
-        uint8_t buffer[512];
-        while (tcpClient.available()) {
-          size = tcpClient.readBytes(buffer, 512);
-          totalSize += _serial->write(buffer, size);
+      if (!_hasTCPClient) {
+        WiFiClient tcpClient = _tcpServer->available();
+        if (tcpClient) {
+          DebugMsgs.debug().println("New TCP update, sending over serial");
+          DebugMsgs.flush();
+          _tcpClient = tcpClient;
+          _hasTCPClient = true;
+          _totalSize = 0;
         }
-        DebugMsgs.debug().printfln("All data sent: %d", totalSize);
-        tcpClient.stop();
+      }
+
+      if (_hasTCPClient) {
+        uint8_t buffer[512];
+
+        if (_tcpClient.available()) {
+          int size = _tcpClient.readBytes(buffer, 512);
+          _totalSize += _serialStream->write(buffer, size);
+        } else {
+          _hasTCPClient = false;
+          _tcpClient.stop();
+          DebugMsgs.debug().printfln("Total bytes sent: %d", _totalSize);
+          DebugMsgs.flush();
+        }
       }
     }
 
   private:
-    WiFiServer* _tcpServer = 0;
-    HardwareSerial* _serial;
+    WiFiServer* _tcpServer;
+    WiFiClient _tcpClient;
+    Stream* _serialStream;
+    bool _hasTCPClient;
+    uint32_t _totalSize;
 };
 
-#endif // TCPTOSERIAL_H
+#endif // TCPTOSERIALTASK_H

@@ -137,8 +137,10 @@ void loop() {
     // stop normal operation
     taskManager.stop();
 
+    FlasherXUpdater::setTimeout(30);
+    
     // perform the OTA update
-    FlasherXUpdater::performUpdate(checkForTCPUpdateTask.getTCPClient());
+    FlasherXUpdater::performUpdate(checkForTCPUpdateTask.getUpdateStream());
 
     // update aborted before restart requires, so restart task manager
     taskManager.start();

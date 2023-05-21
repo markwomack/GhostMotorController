@@ -18,13 +18,14 @@
 #include <GhostMotorManager.h>
 #include <ThreePhaseMotorEncoder.h>
 #include <RampedMotorPID.h>
+#include <CheckForSerialUpdateTask.h>
+#include <FlasherXUpdater.h>
 
 // Local includes
 #include "globals.h"
 #include "pin_assignments.h"
 #include "ReadFromRCTask.h"
 #include "AdjustSpeedsTask.h"
-#include "CheckForOTATask.h"
 
 // Motor manager
 MotorAndEncoderManager* motorManager;
@@ -38,7 +39,7 @@ uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
 ReadFromRCTask readFromRCTask;
 AdjustSpeedsTask adjustSpeedsTask;
-CheckForOTATask checkForOTATask;
+CheckForSerialUpdateTask checkForSerialUpdateTask(&Serial5);
 
 void setup() {
   Serial.begin(115200);
@@ -99,18 +100,15 @@ void setup() {
   adjustSpeedsTask.setMotorManagerAndController(motorManager, motorController);
   adjustSpeedsTask.setReadFromRCTask(&readFromRCTask);
 
-  // Set the serial port to be monitored
-  checkForOTATask.setSerial(&Serial5);
-
   // Set up the task manager with idle tasks
   taskManager.addIdleBlinkTask(100);
-  taskManager.addIdleTask(&checkForOTATask, 1000);
+  taskManager.addIdleTask(&checkForSerialUpdateTask, 1000);
 
   // Set up the task manager with regular tasks
   taskManager.addBlinkTask(500);
   taskManager.addTask(&readFromRCTask, 50);
   taskManager.addTask(&adjustSpeedsTask, 50);
-  taskManager.addTask(&checkForOTATask, 1000);
+  taskManager.addTask(&checkForSerialUpdateTask, 1000);
 
   // Wait for the user to press the button to start
   taskManager.startMonitoringButton(BUTTON_PIN, HIGH);
@@ -119,17 +117,18 @@ void setup() {
 void loop() {
   taskManager.update();
   
-  // If there is an OTA, stop everything and process
-  if (checkForOTATask.otaIsAvailable()) {
-    DebugMsgs.debug().println("OTA update available, processing...");
+  // If there is an firmware update, stop everything and process
+  if (checkForSerialUpdateTask.updateIsAvailable()) {
+    DebugMsgs.debug().println("Firmware update available, processing...");
 
     // stop normal operation
     taskManager.stop();
 
-    // perform the OTA update
-    checkForOTATask.performUpdate();
+    // perform the firmware update
+    FlasherXUpdater::performUpdate(checkForSerialUpdateTask.getUpdateStream());
 
     // update aborted, restart task manager
+    DebugMsgs.debug().println("Firmware update aborted, restarting normal operations");
     taskManager.start();
   }
 }
