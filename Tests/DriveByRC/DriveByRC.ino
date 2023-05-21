@@ -124,11 +124,24 @@ void loop() {
     // stop normal operation
     taskManager.stop();
 
+    // Give some flexibility on receiving update data
+    FlasherXUpdater::setTimeout(100);
+    
     // perform the firmware update
     FlasherXUpdater::performUpdate(checkForSerialUpdateTask.getUpdateStream());
 
+    // bleed any remaining update data
+    Stream* updateStream = checkForSerialUpdateTask.getUpdateStream();
+    uint32_t lastRead = millis();
+    while (millis() < lastRead + 100) {
+      if (updateStream->available()) {
+        updateStream->read();
+        lastRead = millis();
+      }
+    }
+
     // update aborted, restart task manager
     DebugMsgs.debug().println("Firmware update aborted, restarting normal operations");
-    taskManager.start();
+    taskManager.startMonitoringButton(BUTTON_PIN, HIGH);
   }
 }
