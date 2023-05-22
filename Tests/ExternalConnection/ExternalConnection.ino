@@ -35,29 +35,21 @@ class RemoteSerialReaderTask : public Task {
 
     void update(void) {
       if (_srcSerial->available()) {
-        uint32_t size = _srcSerial->readBytesUntil('\r', buffer, 1023);
+        uint32_t size = _srcSerial->readBytes(buffer, sizeof(buffer));
         if (size == 0) {
           return;
         }
 
-        buffer[size] = 0;
-        xferPrinter.print(buffer);
-        
-        int nextByte = _srcSerial->read();
-        if (nextByte == -1) {
-          return;
-        } else if (nextByte == '\n') {
-          xferPrinter.println();
-          xferPrinter.flush();
-        } else {
-          xferPrinter.print((char)nextByte);
+        for (uint32_t x = 0; x < size; x++) {
+          xferPrinter.write(buffer[x]);
         }
+        xferPrinter.flush();
       }
     };
 
   private:
     HardwareSerial* _srcSerial;
-    char buffer[1024];
+    char buffer[16384];
 };
 
 #define SERIAL_BUFFER_SIZE 16384
@@ -111,13 +103,13 @@ void setup() {
   remoteSerialReaderTask.setSrcSerial(&Serial5);
   
   // This task will check the TCP port for the remote OTA every second
-  taskManager.addTask(&tcpToSerialTask, 1000);
+  taskManager.addTask(&tcpToSerialTask, 1);
 
   // This task will check the TCP port for a local OTA every half second
-  taskManager.addTask(&checkForTCPUpdateTask, 500);
+  taskManager.addTask(&checkForTCPUpdateTask, 1000);
 
   // This task will read from the 'remote' serial and xfer to udp
-  taskManager.addTask(&remoteSerialReaderTask, 5);
+  taskManager.addTask(&remoteSerialReaderTask, 1);
 
   // This LED will blink (half second) during normal operations of the sketch
   taskManager.addBlinkTask(LED_STATUS_PIN, 500);
@@ -137,12 +129,25 @@ void loop() {
     // stop normal operation
     taskManager.stop();
 
-    FlasherXUpdater::setTimeout(30);
+    FlasherXUpdater::setTimeout(1000);
     
     // perform the OTA update
     FlasherXUpdater::performUpdate(checkForTCPUpdateTask.getUpdateStream());
 
-    // update aborted before restart requires, so restart task manager
+    // bleed any remaining update data
+    DebugMsgs.debug().println("Firmware update aborted, clearing remaining update data");
+    Stream* updateStream = checkForTCPUpdateTask.getUpdateStream();
+    uint32_t lastRead = millis();
+    while (millis() < lastRead + 1000) {
+      if (updateStream->available()) {
+        uint8_t buffer[4096];
+        updateStream->readBytes(buffer, sizeof(buffer));
+        lastRead = millis();
+      }
+    }
+
+    // update aborted, restart task manager
+    DebugMsgs.debug().println("Firmware update aborted, restarting normal operations");
     taskManager.start();
   }
 }

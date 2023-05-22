@@ -125,17 +125,19 @@ void loop() {
     taskManager.stop();
 
     // Give some flexibility on receiving update data
-    FlasherXUpdater::setTimeout(100);
+    FlasherXUpdater::setTimeout(2000);
     
     // perform the firmware update
     FlasherXUpdater::performUpdate(checkForSerialUpdateTask.getUpdateStream());
 
     // bleed any remaining update data
+    DebugMsgs.debug().println("Firmware update aborted, clearing remaining update data");
     Stream* updateStream = checkForSerialUpdateTask.getUpdateStream();
     uint32_t lastRead = millis();
-    while (millis() < lastRead + 100) {
+    while (millis() < lastRead + 2000) {
       if (updateStream->available()) {
-        updateStream->read();
+        uint8_t buffer[4096];
+        updateStream->readBytes(buffer, sizeof(buffer));
         lastRead = millis();
       }
     }

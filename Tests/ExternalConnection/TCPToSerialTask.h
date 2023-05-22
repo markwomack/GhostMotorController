@@ -42,10 +42,10 @@ class TCPToSerialTask : public Task {
       }
 
       if (_hasTCPClient) {
-        uint8_t buffer[512];
+        uint8_t buffer[8192];
 
         if (_tcpClient.available()) {
-          int size = _tcpClient.readBytes(buffer, 512);
+          int size = _tcpClient.readBytes(buffer, sizeof(buffer));
           _totalSize += _serialStream->write(buffer, size);
         } else {
           _hasTCPClient = false;
