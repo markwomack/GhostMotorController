@@ -115,9 +115,8 @@ void AdjustSpeedsTask::update(void) {
   // Calculate the motor speeds to match, in radians/second
   double desiredM0Speed = _linearVelocity - _angularVelocity;
   double desiredM1Speed = _linearVelocity + _angularVelocity;
-    
+  
   // Set the desired speeds on the motor controller, adjust speeds
-  DebugMsgs.debug().print("Desired motor speeds: ").print(desiredM0Speed).print(" ").println(desiredM1Speed);
   _motorController->setDesiredSpeeds(desiredM0Speed, desiredM1Speed);
   _motorController->adjustSpeeds();
 //  } else {

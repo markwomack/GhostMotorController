@@ -50,10 +50,10 @@ const double WHEEL_CIRCUMFERENCE_M(PI * WHEEL_DIAM_M); // C=2*pi*r -> C=pi*2r ->
 const double MAX_METERS_PER_SECOND(MAX_ROTATIONS_PER_SECOND * WHEEL_CIRCUMFERENCE_M);
 
 // Maximum velocity allowed for linear velocity (forward/reverse)
-const double MAX_LINEAR_VELOCITY_ALLOWED(0.10 * MAX_RADIANS_PER_SECOND);  // 10% of maximum speed
+const double MAX_LINEAR_VELOCITY_ALLOWED(0.25 * MAX_RADIANS_PER_SECOND);  // 10% of maximum speed
 
 // Maximum velocity allowed for angular velocity (left/right)
-const double MAX_ANGULAR_VELOCITY_ALLOWED(0.05 * MAX_RADIANS_PER_SECOND); // 5% of maximum speed
+const double MAX_ANGULAR_VELOCITY_ALLOWED(0.07 * MAX_RADIANS_PER_SECOND); // 7% of maximum speed
 
-const double MAX_SPEED_INCREMENT_ALLOWED(0.01 * MAX_RADIANS_PER_SECOND); // 1% of maximum speed
+const double MAX_SPEED_INCREMENT_ALLOWED(0.10 * MAX_RADIANS_PER_SECOND); // 5% of maximum speed
 #endif // GLOBALS_H

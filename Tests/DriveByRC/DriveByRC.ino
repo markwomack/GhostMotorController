@@ -52,7 +52,7 @@ void setup() {
   DebugMsgs.enableLevel(DEBUG);
 
   // All output now goes to Serial5
-  DebugMsgs.setPrintWrapper(new FlushingPrintWrapper(new PrintWrapper(&Serial5)));
+  DebugMsgs.setPrintWrapper(new PrintWrapper(&Serial5));
 
   DebugMsgs.debug().println("Starting Drive By RC");
   
@@ -125,7 +125,7 @@ void loop() {
     taskManager.stop();
 
     // Give some flexibility on receiving update data
-    FlasherXUpdater::setTimeout(2000);
+    FlasherXUpdater::setTimeout(500);
     
     // perform the firmware update
     FlasherXUpdater::performUpdate(checkForSerialUpdateTask.getUpdateStream());
@@ -134,7 +134,7 @@ void loop() {
     DebugMsgs.debug().println("Firmware update aborted, clearing remaining update data");
     Stream* updateStream = checkForSerialUpdateTask.getUpdateStream();
     uint32_t lastRead = millis();
-    while (millis() < lastRead + 2000) {
+    while (millis() < lastRead + 500) {
       if (updateStream->available()) {
         uint8_t buffer[4096];
         updateStream->readBytes(buffer, sizeof(buffer));

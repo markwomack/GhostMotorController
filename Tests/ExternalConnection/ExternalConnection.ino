@@ -40,16 +40,43 @@ class RemoteSerialReaderTask : public Task {
           return;
         }
 
-        for (uint32_t x = 0; x < size; x++) {
-          xferPrinter.write(buffer[x]);
+        //DebugMsgs.debug().printfln("Starting transfer for %d bytes", size);
+        uint8_t lineBuffer[4096];
+        for (size_t totalSize = 0; totalSize < size;) {
+          bool readLF = false;
+          size_t sendSize = readUntilLF(buffer+totalSize, size - totalSize, lineBuffer, sizeof(lineBuffer), &readLF);
+          //DebugMsgs.debug().printfln("totalSize %d, sendSize %d, lineBuffer '%s'", totalSize, sendSize, lineBuffer);
+          totalSize += sendSize;
+          if (readLF) {
+            xferPrinter.println((char*)lineBuffer);
+          } else {
+            xferPrinter.print((char*)lineBuffer);
+            xferPrinter.flush();
+          }
         }
-        xferPrinter.flush();
+        //DebugMsgs.debug().println("Transfer complete");
       }
     };
 
   private:
     HardwareSerial* _srcSerial;
-    char buffer[16384];
+    uint8_t buffer[16384];
+
+    size_t readUntilLF(uint8_t* src, size_t sizeSrc, uint8_t* dst, size_t sizeDst, bool* readLF) {
+      size_t x = 0;
+      *readLF = false;
+      for (x = 0; x < sizeSrc && x < sizeDst-1; x++) {
+        if (src[x] == '\n') {
+          *readLF = true;
+          break;
+        } else {
+          dst[x] = src[x];
+        }
+      }
+
+      dst[x] = 0;
+      return x + (*readLF ? 1 : 0);
+    };
 };
 
 #define SERIAL_BUFFER_SIZE 16384
@@ -102,10 +129,10 @@ void setup() {
   
   remoteSerialReaderTask.setSrcSerial(&Serial5);
   
-  // This task will check the TCP port for the remote OTA every second
+  // This task will check the TCP port for the remote firmware update every 5ms
   taskManager.addTask(&tcpToSerialTask, 1);
 
-  // This task will check the TCP port for a local OTA every half second
+  // This task will check the TCP port for a local OTA every second
   taskManager.addTask(&checkForTCPUpdateTask, 1000);
 
   // This task will read from the 'remote' serial and xfer to udp
@@ -122,14 +149,14 @@ void loop() {
   // Normal operation
   taskManager.update();
 
-  // If there is an OTA, stop everything and process
+  // If there is a firmware update, stop everything and process
   if (checkForTCPUpdateTask.updateIsAvailable()) {
-    DebugMsgs.debug().println("OTA update available, processing...");
+    DebugMsgs.debug().println("Firmware update available, processing...");
 
     // stop normal operation
     taskManager.stop();
 
-    FlasherXUpdater::setTimeout(1000);
+    FlasherXUpdater::setTimeout(100);
     
     // perform the OTA update
     FlasherXUpdater::performUpdate(checkForTCPUpdateTask.getUpdateStream());
@@ -138,7 +165,7 @@ void loop() {
     DebugMsgs.debug().println("Firmware update aborted, clearing remaining update data");
     Stream* updateStream = checkForTCPUpdateTask.getUpdateStream();
     uint32_t lastRead = millis();
-    while (millis() < lastRead + 1000) {
+    while (millis() < lastRead + 500) {
       if (updateStream->available()) {
         uint8_t buffer[4096];
         updateStream->readBytes(buffer, sizeof(buffer));
