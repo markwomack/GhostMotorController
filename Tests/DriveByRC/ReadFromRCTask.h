@@ -12,7 +12,7 @@ class ReadFromRCTask : public Task {
   public:
     ReadFromRCTask();
     
-    void setRCPins(uint8_t chan1Pin, uint8_t chan2Pin);
+    void setRCPins(int chan1Pin, int chan2Pin, int chan3Pin);
 
     void start(void);
     
@@ -22,12 +22,15 @@ class ReadFromRCTask : public Task {
 
     double getSignal1Value();
     double getSignal2Value();
+    double getSignal3Value();
 
   private:
-    uint8_t _chan1Pin;
-    uint8_t _chan2Pin;
+    int _chan1Pin;
+    int _chan2Pin;
+    int _chan3Pin;
     double _signal1Value;
     double _signal2Value;
+    double _signal3Value;
 
     // Reads the current RC signal on the given pin, returns it
     // as a value between minLimit and maxLimit. Returns NO_RC_SIGNAL

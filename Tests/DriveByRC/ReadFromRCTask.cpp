@@ -16,9 +16,10 @@ ReadFromRCTask::ReadFromRCTask() {
   // Nothing here!
 }
     
-void ReadFromRCTask::setRCPins(uint8_t chan1Pin, uint8_t chan2Pin) {
+void ReadFromRCTask::setRCPins(int chan1Pin, int chan2Pin, int chan3Pin) {
   _chan1Pin = chan1Pin;
   _chan2Pin = chan2Pin;
+  _chan3Pin = chan3Pin;
 }
 
 // Reads the current RC signal on the given pin, returns it
@@ -34,6 +35,7 @@ int ReadFromRCTask::readChannel(int channelPin, int minLimit, int maxLimit) {
 void ReadFromRCTask::start(void) {
   _signal1Value = 0;
   _signal2Value = 0;
+  _signal3Value = 0;
 }
 
 // Called periodically to set the desired motor speeds from the
@@ -41,29 +43,33 @@ void ReadFromRCTask::start(void) {
 void ReadFromRCTask::update(void) {
 
   // Read the current RC signals on both channels
-  int ch1Val = readChannel(_chan1Pin, -100, 100);
-  int ch2Val = readChannel(_chan2Pin, -100, 100);
+  int ch1Val = _chan1Pin != -1 ? readChannel(_chan1Pin, -100, 100) : 0;
+  int ch2Val = _chan2Pin != -1 ? readChannel(_chan2Pin, -100, 100) : 0;
+  int ch3Val = _chan3Pin != -1 ? readChannel(_chan3Pin, -100, 100) : 0;
 
-  //DebugMsgs.debug().print("RC Channels: ").print(ch1Val).print(" : ").println(ch2Val);
+  //DebugMsgs.debug().printfln("RC Channels: %d : %d : %d", ch1Val, ch2Val, ch3Val);
 
   // If either channel has been lost, then stop the robot, stop all the tasks.
-  if (ch1Val == NO_RC_SIGNAL || ch2Val == NO_RC_SIGNAL) {
+  if ((ch1Val == NO_RC_SIGNAL) || (ch2Val == NO_RC_SIGNAL) || (ch3Val == NO_RC_SIGNAL)) {
     DebugMsgs.debug().println("RC channel lost, stopping...");
     taskManager.stop();
     return;
   }
 
-  // maintain a value of zero if close to zero
-  // avoids shimming
   if (abs(ch1Val) <= 5) {
     ch1Val = 0;
   }
+  _signal1Value = ((double)ch1Val/100.0);
+
   if (abs(ch2Val) <= 5) {
     ch2Val = 0;
   }
-
-  _signal1Value = ((double)ch1Val/100.0);
   _signal2Value = ((double)ch2Val/100.0);
+
+  if (abs(ch3Val) <= 5) {
+    ch3Val = 0;
+  }
+  _signal3Value = ((double)ch3Val/100.0);
 }
 
 double ReadFromRCTask::getSignal1Value() {
@@ -72,4 +78,8 @@ double ReadFromRCTask::getSignal1Value() {
 
 double ReadFromRCTask::getSignal2Value() {
   return _signal2Value;
+}
+
+double ReadFromRCTask::getSignal3Value() {
+  return _signal3Value;
 }

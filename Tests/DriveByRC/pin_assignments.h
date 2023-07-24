@@ -25,7 +25,8 @@ const uint8_t BUTTON_PIN(15);
 const uint8_t RC_ENABLE_PIN(18);
 const uint8_t TX_PIN(20);
 const uint8_t RX_PIN(21);
-const uint8_t RC_CH1_PIN(23);
-const uint8_t RC_CH2_PIN(22);
+const uint8_t RC_CH3_PIN(19);
+const uint8_t RC_CH2_PIN(23);
+const uint8_t RC_CH1_PIN(22);
 
 #endif // PIN_ASSIGNMENTS_H

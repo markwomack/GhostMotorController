@@ -26,6 +26,7 @@
 #include "pin_assignments.h"
 #include "ReadFromRCTask.h"
 #include "AdjustSpeedsTask.h"
+#include "MeasureSpeedTask.h"
 
 // Motor manager
 MotorAndEncoderManager* motorManager;
@@ -39,6 +40,7 @@ uint8_t outgoingBuffer[SERIAL_BUFFER_SIZE];
 
 ReadFromRCTask readFromRCTask;
 AdjustSpeedsTask adjustSpeedsTask;
+MeasureSpeedTask measureSpeedTask;
 CheckForSerialUpdateTask checkForSerialUpdateTask(&Serial5);
 
 void setup() {
@@ -66,6 +68,7 @@ void setup() {
   // RC Channel inputs
   pinMode(RC_CH1_PIN, INPUT);
   pinMode(RC_CH2_PIN, INPUT);
+  pinMode(RC_CH3_PIN, INPUT);
 
   // Setup the encoders
   ThreePhaseMotorEncoder* m0ThreePhaseEncoder = new ThreePhaseMotorEncoder();
@@ -94,11 +97,13 @@ void setup() {
   DebugMsgs.debug().print("MAX_SPEED_INCREMENT_ALLOWED: ").println(MAX_SPEED_INCREMENT_ALLOWED);
   
   // Set the RC pins into the readFromRCTask
-  readFromRCTask.setRCPins(RC_CH1_PIN, RC_CH2_PIN);
+  readFromRCTask.setRCPins(RC_CH1_PIN, RC_CH2_PIN, -1);
 
   // Set the needed references into the adjustSpeedsTask
   adjustSpeedsTask.setMotorManagerAndController(motorManager, motorController);
   adjustSpeedsTask.setReadFromRCTask(&readFromRCTask);
+
+  measureSpeedTask.setMotorAndEncoderManager(motorManager);
 
   // Set up the task manager with idle tasks
   taskManager.addIdleBlinkTask(100);
@@ -108,6 +113,7 @@ void setup() {
   taskManager.addBlinkTask(500);
   taskManager.addTask(&readFromRCTask, 50);
   taskManager.addTask(&adjustSpeedsTask, 50);
+  //taskManager.addTask(&measureSpeedTask, 500);
   taskManager.addTask(&checkForSerialUpdateTask, 1000);
 
   // Wait for the user to press the button to start

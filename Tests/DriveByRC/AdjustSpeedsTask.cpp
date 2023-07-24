@@ -42,6 +42,42 @@ void AdjustSpeedsTask::stop(void) {
   digitalWrite(M1_BRAKE_PIN, HIGH);
 }
 
+// Called periodically to set the desired motor speeds from the
+// the RC signals.
+void AdjustSpeedsTask::update(void) {
+
+  // Get RC signal values between -1 and 1
+  double signal1Value = _readFromRCTask->getSignal1Value();
+  double signal2Value = _readFromRCTask->getSignal2Value();
+  double signal3Value = _readFromRCTask->getSignal3Value();
+
+  DebugMsgs.debug().printfln("Signals: %f, %f", signal1Value, signal2Value, signal3Value);
+  
+  // Channel 2 is for linear (forward/reverse) velocity in radians/second
+  double _linearVelocity = signal2Value * MAX_LINEAR_VELOCITY_ALLOWED;
+
+  DebugMsgs.debug().printfln("_linearVelocity: %f", _linearVelocity);
+  
+  // Channel 1 is for angular (left/right) velocity in radians/second
+  double _angularVelocity = signal1Value * MAX_ANGULAR_VELOCITY_ALLOWED;
+
+  DebugMsgs.debug().printfln("_angularVelocity: %f", _angularVelocity);
+
+  // Calculate the motor speeds to match, in radians/second
+  double desiredM0Speed = _linearVelocity - _angularVelocity;
+  double desiredM1Speed = _linearVelocity + _angularVelocity;
+
+  // Apply min/max
+  desiredM0Speed = min(MAX_LINEAR_VELOCITY_ALLOWED, max(-MAX_LINEAR_VELOCITY_ALLOWED, desiredM0Speed));
+  desiredM1Speed = min(MAX_LINEAR_VELOCITY_ALLOWED, max(-MAX_LINEAR_VELOCITY_ALLOWED, desiredM1Speed));
+
+  DebugMsgs.debug().printfln("AdjustSpeedsTasks speeds: %f, %f", desiredM0Speed, desiredM1Speed);
+  
+  // Set the desired speeds on the motor controller, adjust speeds
+  _motorController->setDesiredSpeeds(desiredM0Speed, desiredM1Speed);
+  _motorController->adjustSpeeds();
+}
+
 // Performs a controlled stop on both motors
 void AdjustSpeedsTask::performControlledStop(void) {
   DebugMsgs.debug().println("Performing controlled stop");
@@ -96,46 +132,4 @@ void AdjustSpeedsTask::performControlledStop(void) {
   _motorManager->setMotorSpeeds(0, 0);
   _stopped = true;
   DebugMsgs.debug().println("All motors are stopped");
-}
-
-// Called periodically to set the desired motor speeds from the
-// the RC signals.
-void AdjustSpeedsTask::update(void) {
-
-  // Get RC signal values between -1 and 1
-  double signal1Value = _readFromRCTask->getSignal1Value();
-  double signal2Value = _readFromRCTask->getSignal2Value();
-  
-  // Channel 2 is for linear (forward/reverse) velocity in radians/second
-  double _linearVelocity = signal2Value * MAX_LINEAR_VELOCITY_ALLOWED;
-
-  // Channel 1 is for angular (left/right) velocity in radians/second
-  double _angularVelocity = signal1Value * MAX_ANGULAR_VELOCITY_ALLOWED;
-
-  // Calculate the motor speeds to match, in radians/second
-  double desiredM0Speed = _linearVelocity - _angularVelocity;
-  double desiredM1Speed = _linearVelocity + _angularVelocity;
-  
-  // Set the desired speeds on the motor controller, adjust speeds
-  _motorController->setDesiredSpeeds(desiredM0Speed, desiredM1Speed);
-  _motorController->adjustSpeeds();
-//  } else {
-//    // Convert desired speeds to values between -1 and 1
-//    desiredM0Speed = desiredM0Speed/MAX_RADIANS_PER_SECOND;
-//    desiredM1Speed = desiredM1Speed/MAX_RADIANS_PER_SECOND;
-//    
-//    // set speed according to an acceleration/deceleration ramp
-//    double m0Diff = desiredM0Speed - _targetM0Speed;
-//    double m0Increment = (m0Diff >= 0) ? min(MAX_SPEED_INCREMENT, m0Diff) : max(-MAX_SPEED_INCREMENT, m0Diff);
-//    double m1Diff = desiredM1Speed - _targetM1Speed;
-//    double m1Increment = (m1Diff >= 0) ? min(MAX_SPEED_INCREMENT, m1Diff) : max(-MAX_SPEED_INCREMENT, m1Diff);
-//    
-//    _targetM0Speed += m0Increment;
-//    _targetM1Speed += m1Increment;
-//    
-//    DebugMsgs.debug().print("Setting motor speeds: ").print(_targetM0Speed).print(" ").print(_targetM1Speed)
-//      .print(" ").print(m0Diff).print(" ").println(m1Diff);
-//
-//    _motorManager->setMotorSpeeds(_targetM0Speed, _targetM1Speed);
-//  }
 }
